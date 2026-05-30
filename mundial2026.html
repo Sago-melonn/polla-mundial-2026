@@ -339,9 +339,39 @@ function thirds() {
   return Object.keys(GR).map(gid => { const a = grpArr(gid); return a[2] ? {...a[2], gid} : null; })
     .filter(Boolean).sort((x,y) => y.pts-x.pts || y.gd-x.gd || y.gf-x.gf || x.gc-y.gc);
 }
-function slot(s) {
+// Tabla oficial FIFA: para cada partido que acepta un 3ro,
+// qué grupos pueden proveer ese 3ro (confirmado por Wikipedia/ESPN)
+// Partidos que reciben terceros:
+// P74 (idx1):  3° de A,B,C,D,F
+// P77 (idx4):  3° de C,D,F,G,H
+// P79 (idx6):  3° de C,E,F,H,I
+// P80 (idx7):  3° de E,H,I,J,K
+// P81 (idx8):  3° de B,E,F,I,J
+// P82 (idx9):  3° de A,E,H,I,J
+// P85 (idx12): 3° de E,F,G,I,J
+// P87 (idx14): 3° de D,E,I,J,L
+
+// Mapa: índice en S16 → grupos elegibles para el 3ro
+const THIRD_SLOTS = {
+  1:  ['A','B','C','D','F'],   // P74
+  4:  ['C','D','F','G','H'],   // P77
+  6:  ['C','E','F','H','I'],   // P79
+  7:  ['E','H','I','J','K'],   // P80
+  8:  ['B','E','F','I','J'],   // P81
+  9:  ['A','E','H','I','J'],   // P82
+  12: ['E','F','G','I','J'],   // P85
+  14: ['D','E','I','J','L'],   // P87
+};
+
+function slot(s, slotIdx) {
   if (/^[12][A-L]$/.test(s)) return grpArr(s[1])[parseInt(s[0])-1]?.t || s;
-  if (s.startsWith('3')) return thirds()[0]?.t || s;
+  if (s.startsWith('3')) {
+    const ts = thirds(); // ordenados por ranking
+    const eligible = THIRD_SLOTS[slotIdx] || [];
+    // Encontrar el mejor tercero cuyo grupo esté en la lista elegible
+    const match = ts.find(t => eligible.includes(t.gid));
+    return match ? match.t : (ts[0]?.t || s);
+  }
   return s;
 }
 function koW(r, mi) {
@@ -502,7 +532,7 @@ function buildKO() {
   // 16avos
   const w0 = mkRound(0); 
   S16.forEach((m, mi) => {
-    const ht = slot(m.h), at = slot(m.a);
+    const ht = slot(m.h, mi), at = slot(m.a, mi);
     setKOTeams(0, mi, ht, at);
     w0.appendChild(makeKOCard(0, mi));
   });
