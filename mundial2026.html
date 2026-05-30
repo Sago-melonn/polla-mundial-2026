@@ -309,29 +309,134 @@ const KO_REAL = {
   // Se irán quemando aquí
 };
 
-// Estructura 16avos FIFA 2026
+// Estructura 16avos — Polla La Chucha (confirmada)
+// Partidos 73-88
 const R16_STRUCTURE = [
-  {label:'P1',home:'1A',away:'3CEFHI',date:'Jun 28',venue:'Ciudad de México'},
-  {label:'P2',home:'1C',away:'2F',date:'Jun 29',venue:'Houston'},
-  {label:'P3',home:'1E',away:'3ABCDF',date:'Jun 29',venue:'Foxborough'},
-  {label:'P4',home:'1F',away:'2C',date:'Jun 29',venue:'Guadalajara'},
-  {label:'P5',home:'1I',away:'3CDGH',date:'Jun 30',venue:'Nueva York/NJ'},
-  {label:'P6',home:'2A',away:'3BEFIJ',date:'Jun 30',venue:'Santa Clara'},
-  {label:'P7',home:'1L',away:'3EHIJK',date:'Jul 1',venue:'Atlanta'},
-  {label:'P8',home:'1G',away:'3AEHIJ',date:'Jul 1',venue:'Seattle'},
-  {label:'P9',home:'1D',away:'3BEFIJ',date:'Jul 1',venue:'Santa Clara'},
-  {label:'P10',home:'1H',away:'2J',date:'Jul 2',venue:'Los Ángeles'},
-  {label:'P11',home:'1J',away:'2H',date:'Jul 2',venue:'Miami'},
-  {label:'P12',home:'2E',away:'2I',date:'Jul 2',venue:'Arlington'},
-  {label:'P13',home:'1K',away:'3DEJIL',date:'Jul 2',venue:'Kansas City'},
-  {label:'P14',home:'2K',away:'2L',date:'Jul 3',venue:'Toronto'},
-  {label:'P15',home:'1B',away:'3EFGIJ',date:'Jul 3',venue:'Vancouver'},
-  {label:'P16',home:'2D',away:'2G',date:'Jul 3',venue:'Arlington'},
+  {num:73, label:'P73', home:'2A', away:'2B',        date:'Jun 28', venue:''},
+  {num:74, label:'P74', home:'1E', away:'3ABCDF',    date:'Jun 29', venue:''},
+  {num:75, label:'P75', home:'1F', away:'2C',        date:'Jun 29', venue:''},
+  {num:76, label:'P76', home:'1E', away:'2F',        date:'Jun 29', venue:''},
+  {num:77, label:'P77', home:'1I', away:'3CDFGH',    date:'Jun 30', venue:''},
+  {num:78, label:'P78', home:'2E', away:'2I',        date:'Jun 30', venue:''},
+  {num:79, label:'P79', home:'1A', away:'3CEFHI',    date:'Jun 30', venue:''},
+  {num:80, label:'P80', home:'1L', away:'3EHIJK',    date:'Jul 1',  venue:''},
+  {num:81, label:'P81', home:'1D', away:'3BEFIJ',    date:'Jul 1',  venue:''},
+  {num:82, label:'P82', home:'1G', away:'3AEHIJ',    date:'Jul 1',  venue:''},
+  {num:83, label:'P83', home:'2K', away:'2L',        date:'Jul 2',  venue:''},
+  {num:84, label:'P84', home:'1H', away:'2J',        date:'Jul 2',  venue:''},
+  {num:85, label:'P85', home:'1B', away:'3EFGIJ',    date:'Jul 2',  venue:''},
+  {num:86, label:'P86', home:'1J', away:'2H',        date:'Jul 3',  venue:''},
+  {num:87, label:'P87', home:'1K', away:'3DEJIL',    date:'Jul 3',  venue:''},
+  {num:88, label:'P88', home:'2D', away:'2G',        date:'Jul 3',  venue:''},
 ];
+
+// Octavos — Partidos 89-96
+// Ganadores de 16avos (índice = pos en R16_STRUCTURE, 0-based)
+// P89: gan(P74) vs gan(P77)  → idx 1 vs idx 4
+// P90: gan(P73) vs gan(P75)  → idx 0 vs idx 2
+// P91: gan(P76) vs gan(P78)  → idx 3 vs idx 5
+// P92: gan(P79) vs gan(P80)  → idx 6 vs idx 7
+// P93: gan(P83) vs gan(P84)  → idx 10 vs idx 11
+// P94: gan(P81) vs gan(P82)  → idx 8 vs idx 9
+// P95: gan(P86) vs gan(P88)  → idx 13 vs idx 15
+// P96: gan(P85) vs gan(P87)  → idx 12 vs idx 14
+const R8_STRUCTURE = [
+  {num:89, label:'P89', h16:1,  a16:4,  date:'Jul 4'},
+  {num:90, label:'P90', h16:0,  a16:2,  date:'Jul 4'},
+  {num:91, label:'P91', h16:3,  a16:5,  date:'Jul 5'},
+  {num:92, label:'P92', h16:6,  a16:7,  date:'Jul 5'},
+  {num:93, label:'P93', h16:10, a16:11, date:'Jul 6'},
+  {num:94, label:'P94', h16:8,  a16:9,  date:'Jul 6'},
+  {num:95, label:'P95', h16:13, a16:15, date:'Jul 7'},
+  {num:96, label:'P96', h16:12, a16:14, date:'Jul 7'},
+];
+
+// Cuartos — Partidos 97-100
+// P97: gan(P89) vs gan(P90)  → r8 idx 0 vs 1
+// P98: gan(P93) vs gan(P94)  → r8 idx 4 vs 5
+// P99: gan(P91) vs gan(P92)  → r8 idx 2 vs 3
+// P100: gan(P95) vs gan(P96) → r8 idx 6 vs 7
+const QF_STRUCTURE = [
+  {num:97,  label:'P97',  hr8:0, ar8:1, date:'Jul 9'},
+  {num:98,  label:'P98',  hr8:4, ar8:5, date:'Jul 10'},
+  {num:99,  label:'P99',  hr8:2, ar8:3, date:'Jul 10'},
+  {num:100, label:'P100', hr8:6, ar8:7, date:'Jul 11'},
+];
+
+// Semis — Partidos 101-102
+// P101: gan(P97) vs gan(P98) → qf idx 0 vs 1  ← REVISAR si es 97 vs 98
+// P102: gan(P99) vs gan(P100)→ qf idx 2 vs 3
+const SF_STRUCTURE = [
+  {num:101, label:'P101', hqf:0, aqf:1, date:'Jul 14'},
+  {num:102, label:'P102', hqf:2, aqf:3, date:'Jul 15'},
+];
+
+// Final P104: gan(P101) vs gan(P102)
+// Tercer puesto P103: per(P101) vs per(P102)
+
 
 const ROUND_NAMES = ['16avos de Final','Octavos de Final','Cuartos de Final','Semifinales','Final','Tercer Puesto'];
 const ROUND_PTS   = [3,4,5,6,7,10];
 const ROUND_SIZES = [16,8,4,2,1,1];
+
+// Resolver slot de 16avos (ej: '1A' → 1° del grupo A, '3ABCDF' → mejor 3° de esos grupos)
+function resolveR16Slot(slot) {
+  if (/^[12][A-L]$/.test(slot)) {
+    return calcGroup(slot[1])[parseInt(slot[0])-1]?.team || slot;
+  }
+  if (slot.startsWith('3')) {
+    const thirds = getThirds();
+    return thirds[0]?.team || slot;
+  }
+  return slot;
+}
+
+// Ganador de un partido en 16avos (por índice 0-15)
+function winner16(idx) {
+  const s = KO_REAL[0]?.[idx] || koReal[0]?.[idx] || KO_PREDS[0]?.[idx] || koScores[0]?.[idx];
+  if (!s || s.h==='' || s.a==='') return null;
+  const h=parseInt(s.h), a=parseInt(s.a);
+  if (h>a) return s.homeTeam;
+  if (h<a) return s.awayTeam;
+  return s.pen || null;
+}
+
+// Ganador de un partido en octavos (por índice 0-7)
+function winner8(idx) {
+  const s = KO_REAL[1]?.[idx] || koReal[1]?.[idx] || KO_PREDS[1]?.[idx] || koScores[1]?.[idx];
+  if (!s || s.h==='' || s.a==='') return null;
+  const h=parseInt(s.h), a=parseInt(s.a);
+  if (h>a) return s.homeTeam;
+  if (h<a) return s.awayTeam;
+  return s.pen || null;
+}
+
+// Ganador de un partido en cuartos (por índice 0-3)
+function winnerQF(idx) {
+  const s = KO_REAL[2]?.[idx] || koReal[2]?.[idx] || KO_PREDS[2]?.[idx] || koScores[2]?.[idx];
+  if (!s || s.h==='' || s.a==='') return null;
+  const h=parseInt(s.h), a=parseInt(s.a);
+  if (h>a) return s.homeTeam;
+  if (h<a) return s.awayTeam;
+  return s.pen || null;
+}
+
+// Ganador de un partido en semis (por índice 0-1)
+function winnerSF(idx) {
+  const s = KO_REAL[3]?.[idx] || koReal[3]?.[idx] || KO_PREDS[3]?.[idx] || koScores[3]?.[idx];
+  if (!s || s.h==='' || s.a==='') return null;
+  const h=parseInt(s.h), a=parseInt(s.a);
+  if (h>a) return s.homeTeam;
+  if (h<a) return s.awayTeam;
+  return s.pen || null;
+}
+
+function loserSF(idx) {
+  const w = winnerSF(idx);
+  const s = KO_REAL[3]?.[idx] || koReal[3]?.[idx] || KO_PREDS[3]?.[idx] || koScores[3]?.[idx];
+  if (!w || !s) return null;
+  return w === s.homeTeam ? s.awayTeam : s.homeTeam;
+}
 
 // ═══════════════════════════════════════════════════════
 // ESTADO (localStorage para cambios en vivo)
@@ -549,78 +654,91 @@ function renderThirds() {
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// RESOLUCIÓN LLAVES
-// ═══════════════════════════════════════════════════════
-function resolveSlot(slot) {
-  if(/^[12][A-L]$/.test(slot)){
-    return calcGroup(slot[1])[parseInt(slot[0])-1]?.team||slot;
-  }
-  if(slot.startsWith('3')){
-    const thirds=getThirds();
-    return thirds[0]?.team||slot;
-  }
-  return slot;
-}
-
-function koWinner(round,mi){
-  const s=KO_REAL[round]?.[mi]||koReal[round]?.[mi]||KO_PREDS[round]?.[mi]||koScores[round]?.[mi];
-  if(!s||s.h===''||s.a==='')return null;
-  const h=parseInt(s.h),a=parseInt(s.a);
-  if(h>a)return s.homeTeam;
-  if(h<a)return s.awayTeam;
-  return s.pen||null;
-}
-function koLoser(round,mi){
-  const w=koWinner(round,mi);
-  const s=KO_REAL[round]?.[mi]||koReal[round]?.[mi]||KO_PREDS[round]?.[mi]||koScores[round]?.[mi];
-  if(!w||!s)return null;
-  return w===s.homeTeam?s.awayTeam:s.homeTeam;
-}
+// resolución de llaves integrada en buildKO
 
 // ═══════════════════════════════════════════════════════
-// BUILD KNOCKOUT
+// BUILD KNOCKOUT — estructura según Polla La Chucha
 // ═══════════════════════════════════════════════════════
 function buildKO() {
-  const container=document.getElementById('koContainer');
-  container.innerHTML='';
-  for(let r=0;r<6;r++){
-    if(!koScores[r])koScores[r]={};
-    if(!koReal[r])koReal[r]={};
-    const wrap=document.createElement('div');wrap.className='ko-round';
-    const title=document.createElement('div');title.className='ko-round-title';
-    title.innerHTML=ROUND_NAMES[r]+`<span class="ko-pts-tag">+${ROUND_PTS[r]} pts por acierto</span>`;
-    wrap.appendChild(title);
-    const matchCount=ROUND_SIZES[r];
-    for(let mi=0;mi<matchCount;mi++){
-      let home='?',away='?',label='',date='',venue='';
-      if(r===0){
-        const t=get16avosTeams(mi);home=t.home;away=t.away;
-        label=R16_STRUCTURE[mi].label;date=R16_STRUCTURE[mi].date;venue=R16_STRUCTURE[mi].venue;
-      } else if(r===5){
-        home=koLoser(3,0)||'Perdedor SF1';away=koLoser(3,1)||'Perdedor SF2';
-        label='Tercer Puesto';date='Jul 18';venue='MetLife Stadium, NJ';
-      } else {
-        home=koWinner(r-1,mi*2)||'Ganador P'+(mi*2+1);
-        away=koWinner(r-1,mi*2+1)||'Ganador P'+(mi*2+2);
-        label=ROUND_NAMES[r]+' P'+(mi+1);
-        date=['','Jun 28–Jul 3','Jul 4–7','Jul 9–11','Jul 14–15','Jul 19','Jul 18'][r]||'';
-      }
-      // Predicción (pred) y real (real) para este partido KO
-      const pred=KO_PREDS[r]?.[mi]||koScores[r]?.[mi]||null;
-      const real=KO_REAL[r]?.[mi]||koReal[r]?.[mi]||null;
-      // Guardar equipos
-      if(!koScores[r][mi])koScores[r][mi]={h:'',a:'',pen:null,homeTeam:home,awayTeam:away};
-      else{koScores[r][mi].homeTeam=home;koScores[r][mi].awayTeam=away;}
-      wrap.appendChild(buildKOCard(r,mi,home,away,label,date,venue,pred,real));
-    }
-    container.appendChild(wrap);
+  const container = document.getElementById('koContainer');
+  container.innerHTML = '';
+  for (let r = 0; r < 6; r++) {
+    if (!koScores[r]) koScores[r] = {};
+    if (!koReal[r]) koReal[r] = {};
   }
+
+  // ── 16avos (r=0) ──────────────────────────────────────
+  const wrap0 = makeRoundWrap(0);
+  R16_STRUCTURE.forEach((m, mi) => {
+    const home = resolveR16Slot(m.home);
+    const away = resolveR16Slot(m.away);
+    setTeams(0, mi, home, away);
+    wrap0.appendChild(buildKOCard(0, mi, home, away, m.label, m.date, ''));
+  });
+  container.appendChild(wrap0);
+
+  // ── Octavos (r=1) ─────────────────────────────────────
+  const wrap1 = makeRoundWrap(1);
+  R8_STRUCTURE.forEach((m, mi) => {
+    const home = winner16(m.h16) || 'Gan.P'+(R16_STRUCTURE[m.h16].num);
+    const away = winner16(m.a16) || 'Gan.P'+(R16_STRUCTURE[m.a16].num);
+    setTeams(1, mi, home, away);
+    wrap1.appendChild(buildKOCard(1, mi, home, away, m.label, m.date, ''));
+  });
+  container.appendChild(wrap1);
+
+  // ── Cuartos (r=2) ─────────────────────────────────────
+  const wrap2 = makeRoundWrap(2);
+  QF_STRUCTURE.forEach((m, mi) => {
+    const home = winner8(m.hr8) || 'Gan.P'+(R8_STRUCTURE[m.hr8].num);
+    const away = winner8(m.ar8) || 'Gan.P'+(R8_STRUCTURE[m.ar8].num);
+    setTeams(2, mi, home, away);
+    wrap2.appendChild(buildKOCard(2, mi, home, away, m.label, m.date, ''));
+  });
+  container.appendChild(wrap2);
+
+  // ── Semis (r=3) ───────────────────────────────────────
+  const wrap3 = makeRoundWrap(3);
+  SF_STRUCTURE.forEach((m, mi) => {
+    const home = winnerQF(m.hqf) || 'Gan.P'+(QF_STRUCTURE[m.hqf].num);
+    const away = winnerQF(m.aqf) || 'Gan.P'+(QF_STRUCTURE[m.aqf].num);
+    setTeams(3, mi, home, away);
+    wrap3.appendChild(buildKOCard(3, mi, home, away, m.label, m.date, ''));
+  });
+  container.appendChild(wrap3);
+
+  // ── Final P104 (r=4) ──────────────────────────────────
+  const wrap4 = makeRoundWrap(4);
+  {
+    const home = winnerSF(0) || 'Gan.P101';
+    const away = winnerSF(1) || 'Gan.P102';
+    setTeams(4, 0, home, away);
+    wrap4.appendChild(buildKOCard(4, 0, home, away, 'P104 — GRAN FINAL', 'Jul 19', 'MetLife Stadium, NJ'));
+  }
+  container.appendChild(wrap4);
+
+  // ── Tercer Puesto P103 (r=5) ──────────────────────────
+  const wrap5 = makeRoundWrap(5);
+  {
+    const home = loserSF(0) || 'Per.P101';
+    const away = loserSF(1) || 'Per.P102';
+    setTeams(5, 0, home, away);
+    wrap5.appendChild(buildKOCard(5, 0, home, away, 'P103 — Tercer Puesto', 'Jul 18', 'MetLife Stadium, NJ'));
+  }
+  container.appendChild(wrap5);
 }
 
-function get16avosTeams(mi){
-  const m=R16_STRUCTURE[mi];
-  return{home:resolveSlot(m.home),away:resolveSlot(m.away)};
+function makeRoundWrap(r) {
+  const wrap = document.createElement('div'); wrap.className = 'ko-round';
+  const title = document.createElement('div'); title.className = 'ko-round-title';
+  title.innerHTML = ROUND_NAMES[r] + `<span class="ko-pts-tag">+${ROUND_PTS[r]} pts por acierto</span>`;
+  wrap.appendChild(title);
+  return wrap;
+}
+
+function setTeams(r, mi, home, away) {
+  if (!koScores[r][mi]) koScores[r][mi] = {h:'',a:'',pen:null,homeTeam:home,awayTeam:away};
+  else { koScores[r][mi].homeTeam = home; koScores[r][mi].awayTeam = away; }
 }
 
 function buildKOCard(r,mi,home,away,label,date,venue,pred,real){
