@@ -173,14 +173,17 @@ input.real-name:focus{border-color:var(--d);}
 <div id="resumen" class="pg">
   <div class="hero"><div class="big" id="tPts">0</div><div class="lbl">PUNTOS — POLLA LA CHUCHA</div></div>
   <div class="mets">
-    <div class="met"><div class="val" id="mR">0</div><div class="lbl">Resultados grupos (+1)</div></div>
+    <div class="met"><div class="val" id="mR">0</div><div class="lbl">Resultados acertados (+1)</div></div>
     <div class="met"><div class="val" id="mM">0</div><div class="lbl">Marcadores exactos (+3)</div></div>
-    <div class="met"><div class="val" id="m16">0</div><div class="lbl">16avos (+3)</div></div>
-    <div class="met"><div class="val" id="m8">0</div><div class="lbl">Octavos (+4)</div></div>
-    <div class="met"><div class="val" id="m4">0</div><div class="lbl">Cuartos (+5)</div></div>
-    <div class="met"><div class="val" id="m2">0</div><div class="lbl">Semis (+6)</div></div>
-    <div class="met"><div class="val" id="m1">0</div><div class="lbl">Final (+7)</div></div>
-    <div class="met"><div class="val" id="m3">0</div><div class="lbl">3er puesto (+10)</div></div>
+    <div class="met"><div class="val" id="m16">0</div><div class="lbl">Aciertos 16avos (+3)</div></div>
+    <div class="met"><div class="val" id="m8">0</div><div class="lbl">Aciertos octavos (+4)</div></div>
+    <div class="met"><div class="val" id="m4">0</div><div class="lbl">Aciertos cuartos (+5)</div></div>
+    <div class="met"><div class="val" id="m2">0</div><div class="lbl">Aciertos semis (+6)</div></div>
+    <div class="met"><div class="val" id="m1">0</div><div class="lbl">Finalistas acertados (+7)</div></div>
+    <div class="met"><div class="val" id="m3">0</div><div class="lbl">Tercer puesto (+10)</div></div>
+    <div class="met"><div class="val" id="mSub">0</div><div class="lbl">Subcampeón (+15)</div></div>
+    <div class="met"><div class="val" id="mCamp">0</div><div class="lbl">Campeón (+20)</div></div>
+    <div class="met"><div class="val" id="mCuarto">0</div><div class="lbl">Cuarto puesto (+7)</div></div>
   </div>
   <div class="bkd"><h3>Desglose</h3><div id="bkList"><div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div></div></div>
 </div>
@@ -322,6 +325,11 @@ const PRED_KO = [
 
 const RNAMES = ['16avos de Final','Octavos de Final','Cuartos de Final','Semifinales','Final','Tercer Puesto'];
 const RPTS   = [3,4,5,6,7,10];
+// Puntos especiales posiciones finales
+const PTS_CAMPEON    = 20;
+const PTS_SUBCAMPEON = 15;
+const PTS_TERCERO    = 10;
+const PTS_CUARTO     = 7;
 
 // ══════════════════════════════════════════════════════
 // ESTADO
@@ -682,36 +690,104 @@ function buildRealKO() {
 // RESUMEN
 // ══════════════════════════════════════════════════════
 function calcResumen() {
-  let total=0,res_=0,mark=0,pts16=0,pts8=0,pts4=0,pts2=0,pts1=0,pts3=0;
+  let total=0, res_=0, mark=0;
+  let pts16=0, pts8=0, pts4=0, pts2=0;
+  let ptsFin=0, pts3er=0, ptsCamp=0, ptsSub=0, ptsCuarto=0;
   const items=[];
 
-  // Grupos
+  // ── GRUPOS ─────────────────────────────────────────
   Object.keys(GR).forEach(gid=>{
     GR[gid].m.forEach((m,mi)=>{
       const rk=gid+'_'+mi;
-      const rv=REAL_FIXED[rk]||real[gid]?.[mi];if(!rv)return;
+      const rv=REAL_FIXED[rk]||real[gid]?.[mi]; if(!rv)return;
       const p=pred[gid][mi];
+      // Regla 1: +1 acierto resultado
       if(resStr(p.h,p.a)===resStr(rv.h,rv.a)){total+=1;res_+=1;}
-      if(p.h===rv.h&&p.a===rv.a){total+=3;mark+=1;items.push(`⭐ Marcador exacto ${m.h} ${p.h}-${p.a} ${m.a}: +3`);}
+      // Regla 2: +3 acierto marcador exacto
+      if(p.h===rv.h&&p.a===rv.a){
+        total+=3; mark+=1;
+        items.push({l:`⭐ Marcador exacto: ${m.h} ${p.h}-${p.a} ${m.a}`,p:'+3'});
+      }
     });
   });
-  if(res_>0)items.unshift(`✓ ${res_} resultado(s) correcto(s): +${res_}`);
+  if(res_>0) items.unshift({l:`✓ ${res_} resultado(s) correcto(s)`,p:`+${res_}`});
 
-  // KO
+  // ── FASE ELIMINACIÓN ───────────────────────────────
+  // Reglas 3-7: clasificados por ronda
+  // R0=16avos(+3), R1=octavos(+4), R2=cuartos(+5), R3=semis(+6)
+  // R4=Final: +7 por clasificar (llegar a final)
+  // R5=3er puesto: +10 por acertar 3er puesto
+  // + Reglas 8-11: cuarto(+7), tercero(+10), subcampeón(+15), campeón(+20)
+
   PRED_KO.forEach((round,r)=>{
     round.forEach((pm,mi)=>{
-      const rw=realKOWinner(r,mi);if(!rw)return;
-      const predW=pm.ph>pm.pa?pm.ht:pm.ph<pm.pa?pm.at:pm.pen;
-      if(rw===predW){
-        const p=RPTS[r];
-        total+=p;
-        if(r===0)pts16+=p;else if(r===1)pts8+=p;else if(r===2)pts4+=p;
-        else if(r===3)pts2+=p;else if(r===4)pts1+=p;else pts3+=p;
-        items.push(`✓ ${pm.n} ${predW}: +${p} pts`);
+      const rw = realKOWinner(r,mi); if(!rw) return;
+      const predW = pm.ph>pm.pa ? pm.ht : pm.ph<pm.pa ? pm.at : pm.pen;
+
+      if(r===0){ // 16avos: +3 por cada equipo que clasificó correctamente
+        if(rw===predW){total+=3;pts16+=3;items.push({l:`✓ ${pm.n}: ${predW} clasifica a octavos`,p:'+3'});}
+      }
+      else if(r===1){ // Octavos: +4
+        if(rw===predW){total+=4;pts8+=4;items.push({l:`✓ ${pm.n}: ${predW} clasifica a cuartos`,p:'+4'});}
+      }
+      else if(r===2){ // Cuartos: +5
+        if(rw===predW){total+=5;pts4+=5;items.push({l:`✓ ${pm.n}: ${predW} clasifica a semis`,p:'+5'});}
+      }
+      else if(r===3){ // Semis: +6 por clasificar a final
+        if(rw===predW){total+=6;pts2+=6;items.push({l:`✓ ${pm.n}: ${predW} clasifica a final`,p:'+6'});}
+      }
+      else if(r===4){ // Final
+        // Regla 7: +7 por acertar quién llega a la final (ambos finalistas)
+        // El ganador es el campeón, el perdedor es subcampeón
+        const realFinalLoser = realKOLoser(4,0);
+        // +7 clasificado a final (ambos finalistas — ya se contó en semis)
+        // Regla 11: +20 campeón
+        if(rw===predW){
+          total+=PTS_CAMPEON; ptsCamp+=PTS_CAMPEON;
+          items.push({l:`🏆 Campeón acertado: ${rw}`,p:`+${PTS_CAMPEON}`});
+        }
+        // Regla 10: +15 subcampeón
+        const predLoser = pm.ph>pm.pa ? pm.at : pm.ph<pm.pa ? pm.ht : (pm.pen===pm.ht?pm.at:pm.ht);
+        if(realFinalLoser && realFinalLoser===predLoser){
+          total+=PTS_SUBCAMPEON; ptsSub+=PTS_SUBCAMPEON;
+          items.push({l:`🥈 Subcampeón acertado: ${realFinalLoser}`,p:`+${PTS_SUBCAMPEON}`});
+        }
+        // Regla 8: +7 cuarto puesto (el perdedor del partido de 3er puesto)
+        // Se calcula abajo con r===5
+      }
+      else if(r===5){ // 3er puesto
+        // Regla 9: +10 tercer puesto
+        if(rw===predW){
+          total+=PTS_TERCERO; pts3er+=PTS_TERCERO;
+          items.push({l:`🥉 Tercer puesto acertado: ${rw}`,p:`+${PTS_TERCERO}`});
+        }
+        // Regla 8: +7 cuarto puesto (perdedor del partido de 3er puesto)
+        const realFourth = realKOLoser(5,0);
+        const predFourth = pm.ph>pm.pa ? pm.at : pm.ph<pm.pa ? pm.ht : (pm.pen===pm.ht?pm.at:pm.ht);
+        if(realFourth && realFourth===predFourth){
+          total+=PTS_CUARTO; ptsCuarto+=PTS_CUARTO;
+          items.push({l:`4° Cuarto puesto acertado: ${realFourth}`,p:`+${PTS_CUARTO}`});
+        }
       }
     });
   });
 
+  // Clasificados a final (+7): acertar que un equipo llega a la final
+  // Se evalúa con los dos finalistas reales vs los dos finalistas predichos
+  const realFin0 = realKO[4]?.[0];
+  if(realFin0&&realFin0.ht&&realFin0.at){
+    const realFinalists=[realFin0.ht, realFin0.at];
+    const predFin=PRED_KO[4][0];
+    const predFinalists=[predFin.ht, predFin.at];
+    realFinalists.forEach(team=>{
+      if(predFinalists.includes(team)){
+        total+=7; ptsFin+=7;
+        items.push({l:`✓ Finalista acertado: ${team}`,p:'+7'});
+      }
+    });
+  }
+
+  // Actualizar UI
   document.getElementById('tPts').textContent=total;
   document.getElementById('mR').textContent=res_;
   document.getElementById('mM').textContent=mark;
@@ -719,11 +795,15 @@ function calcResumen() {
   document.getElementById('m8').textContent=pts8/4|0;
   document.getElementById('m4').textContent=pts4/5|0;
   document.getElementById('m2').textContent=pts2/6|0;
-  document.getElementById('m1').textContent=pts1/7|0;
-  document.getElementById('m3').textContent=pts3/10|0;
+  document.getElementById('m1').textContent=ptsFin/7|0;
+  document.getElementById('m3').textContent=pts3er>0?1:0;
+  document.getElementById('mSub').textContent=ptsSub>0?1:0;
+  document.getElementById('mCamp').textContent=ptsCamp>0?1:0;
+  document.getElementById('mCuarto').textContent=ptsCuarto>0?1:0;
+
   const bl=document.getElementById('bkList');
   bl.innerHTML=items.length
-    ?items.map(i=>`<div class="bdi"><span>${i.split(':')[0]}</span><span class="bdp">${(i.split(':')[1]||'').trim()}</span></div>`).join('')
+    ?items.map(i=>`<div class="bdi"><span>${i.l}</span><span class="bdp">${i.p}</span></div>`).join('')
     :'<div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div>';
 }
 
