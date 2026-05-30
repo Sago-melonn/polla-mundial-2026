@@ -20,7 +20,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .toast.on{opacity:1;}
 nav{display:flex;overflow-x:auto;background:var(--b2);border-bottom:1px solid var(--br);scrollbar-width:none;}
 nav::-webkit-scrollbar{display:none;}
-nav button{flex-shrink:0;padding:10px 12px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
+nav button{flex-shrink:0;padding:10px 11px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
 nav button.on{color:var(--v);border-bottom-color:var(--v);}
 .pg{display:none;padding:12px;}
 .pg.on{display:block;}
@@ -67,8 +67,6 @@ input.si:focus{border-color:var(--v);}
 .st tr.c3 td:first-child{border-left:3px solid var(--d);}
 .st tr.c4 td:first-child{border-left:3px solid var(--r);}
 .pos{font-size:9px;color:var(--t2);margin-right:2px;}
-
-/* THIRDS */
 .tw{overflow-x:auto;border-radius:var(--rd);border:1px solid var(--br);}
 .tt{width:100%;border-collapse:collapse;font-size:11px;min-width:340px;}
 .tt th{background:var(--b3);color:var(--t2);font-weight:500;padding:6px 4px;text-align:center;border-bottom:1px solid var(--br);}
@@ -94,6 +92,24 @@ input.si:focus{border-color:var(--v);}
 .tbd{color:var(--t2) !important;font-style:italic;font-size:11px !important;}
 .wn{color:var(--v) !important;font-weight:600 !important;}
 .ls{color:var(--t2) !important;}
+
+/* KO REAL — sección separada */
+.real-section{background:rgba(244,160,21,0.04);border:1px solid rgba(244,160,21,0.15);border-radius:var(--rd);padding:10px;margin-top:12px;}
+.real-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--d);margin-bottom:8px;}
+.real-match{background:var(--b2);border:1px solid var(--br);border-radius:var(--rd);margin-bottom:6px;overflow:hidden;}
+.real-match-header{font-size:10px;color:var(--t2);padding:5px 10px 0;}
+.real-row{display:grid;grid-template-columns:1fr 76px 1fr;align-items:center;padding:6px 10px 8px;}
+.real-team{font-size:12px;font-weight:500;color:var(--d);}
+.real-team.l{text-align:right;}
+.real-team.r{text-align:left;}
+.real-team.wn{color:var(--v) !important;font-weight:700 !important;}
+.real-team.ls{color:var(--t2) !important;}
+input.real-si{width:32px;height:32px;border-radius:6px;border:1px solid rgba(244,160,21,0.3);background:var(--b3);color:var(--d);font-size:15px;font-weight:600;text-align:center;font-family:'DM Sans',sans-serif;-moz-appearance:textfield;outline:none;}
+input.real-si::-webkit-inner-spin-button,input.real-si::-webkit-outer-spin-button{-webkit-appearance:none;}
+input.real-si:focus{border-color:var(--d);}
+input.real-name{width:100%;padding:4px 7px;border-radius:5px;border:1px solid rgba(244,160,21,0.3);background:var(--b3);color:var(--d);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:3px;}
+input.real-name:focus{border-color:var(--d);}
+.pts-compare{display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 10px 6px;flex-wrap:wrap;}
 
 /* RESUMEN */
 .hero{background:linear-gradient(135deg,#0d3d26,#0d1117);border:1px solid var(--vd);border-radius:var(--rd);padding:18px;text-align:center;margin-bottom:10px;}
@@ -126,7 +142,8 @@ input.si:focus{border-color:var(--v);}
   <button class="on" onclick="showPg('grupos',this)">Grupos</button>
   <button onclick="showPg('posiciones',this)">Posiciones</button>
   <button onclick="showPg('terceros',this)">3ros</button>
-  <button onclick="showPg('eliminacion',this)">Eliminación</button>
+  <button onclick="showPg('predicciones',this)">Predicciones</button>
+  <button onclick="showPg('realko',this)">Resultados Reales</button>
   <button onclick="showPg('resumen',this)">Resumen</button>
 </nav>
 
@@ -140,11 +157,23 @@ input.si:focus{border-color:var(--v);}
     <tbody id="tBody"></tbody>
   </table></div>
 </div>
-<div id="eliminacion" class="pg"><div id="koWrap"></div></div>
+
+<!-- PREDICCIONES KO — solo lectura/editable -->
+<div id="predicciones" class="pg">
+  <div class="ibox">Tus predicciones originales de la fase de eliminación. Estos son tus pronósticos fijos.</div>
+  <div id="predWrap"></div>
+</div>
+
+<!-- RESULTADOS REALES KO — equipos reales, independiente -->
+<div id="realko" class="pg">
+  <div class="ibox" style="background:rgba(244,160,21,0.1);border-color:rgba(244,160,21,0.3);">Ingresa los resultados reales a medida que se juegan. Los equipos pueden ser distintos a tus predicciones. Cada ronda se actualiza con los ganadores reales de la ronda anterior.</div>
+  <div id="realWrap"></div>
+</div>
+
 <div id="resumen" class="pg">
   <div class="hero"><div class="big" id="tPts">0</div><div class="lbl">PUNTOS — POLLA LA CHUCHA</div></div>
   <div class="mets">
-    <div class="met"><div class="val" id="mR">0</div><div class="lbl">Resultados (+1)</div></div>
+    <div class="met"><div class="val" id="mR">0</div><div class="lbl">Resultados grupos (+1)</div></div>
     <div class="met"><div class="val" id="mM">0</div><div class="lbl">Marcadores exactos (+3)</div></div>
     <div class="met"><div class="val" id="m16">0</div><div class="lbl">16avos (+3)</div></div>
     <div class="met"><div class="val" id="m8">0</div><div class="lbl">Octavos (+4)</div></div>
@@ -157,7 +186,9 @@ input.si:focus{border-color:var(--v);}
 </div>
 
 <script>
-// ── DATOS GRUPOS ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// DATOS GRUPOS (quemados)
+// ══════════════════════════════════════════════════════
 const GR = {
   A:{t:['México','Sudáfrica','Corea del Sur','Chequia'],m:[
     {d:'Jun 11',h:'México',a:'Sudáfrica',v:'Ciudad de México',ph:2,pa:0},
@@ -245,114 +276,69 @@ const GR = {
     {d:'Jun 27',h:'Croacia',a:'Ghana',v:'Filadelfia',ph:2,pa:0}]}
 };
 
-// ── ESTRUCTURA KO ─────────────────────────────────────────────
-// 16avos P73-P88
-const S16 = [
-  {n:73,h:'2A',a:'2B',d:'Jun 28'},{n:74,h:'1E',a:'3ABCDF',d:'Jun 29'},
-  {n:75,h:'1F',a:'2C',d:'Jun 29'},{n:76,h:'1C',a:'2F',d:'Jun 29'},
-  {n:77,h:'1I',a:'3CDFGH',d:'Jun 30'},{n:78,h:'2E',a:'2I',d:'Jun 30'},
-  {n:79,h:'1A',a:'3CEFHI',d:'Jun 30'},{n:80,h:'1L',a:'3EHIJK',d:'Jul 1'},
-  {n:81,h:'1D',a:'3BEFIJ',d:'Jul 1'},{n:82,h:'1G',a:'3AEHIJ',d:'Jul 1'},
-  {n:83,h:'2K',a:'2L',d:'Jul 2'},{n:84,h:'1H',a:'2J',d:'Jul 2'},
-  {n:85,h:'1B',a:'3EFGIJ',d:'Jul 2'},{n:86,h:'1J',a:'2H',d:'Jul 3'},
-  {n:87,h:'1K',a:'3DEJIL',d:'Jul 3'},{n:88,h:'2D',a:'2G',d:'Jul 3'}
-];
-// Octavos P89-P96
-const S8 = [
-  {n:89, hi:1,  ai:4,  d:'Jul 4',  ht:'Alemania',      at:'Francia'},
-  {n:90, hi:0,  ai:2,  d:'Jul 4',  ht:'Corea del Sur', at:'Holanda'},
-  {n:91, hi:3,  ai:5,  d:'Jul 5',  ht:'Brasil',        at:'Costa de Marfil'},
-  {n:92, hi:6,  ai:7,  d:'Jul 5',  ht:'México',        at:'Inglaterra'},
-  {n:93, hi:10, ai:11, d:'Jul 6',  ht:'Colombia',      at:'España'},
-  {n:94, hi:8,  ai:9,  d:'Jul 6',  ht:'EE.UU.',        at:'Senegal'},
-  {n:95, hi:13, ai:15, d:'Jul 7',  ht:'Argentina',     at:'Japón'},
-  {n:96, hi:12, ai:14, d:'Jul 7',  ht:'Portugal',      at:'Turquía'},
-];
-// Cuartos P97-P100
-const SQF = [
-  {n:97,  hi:0, ai:1, d:'Jul 9',  ht:'Alemania',  at:'Holanda'},
-  {n:98,  hi:4, ai:5, d:'Jul 10', ht:'Colombia',  at:'Senegal'},
-  {n:99,  hi:2, ai:3, d:'Jul 10', ht:'Brasil',    at:'Inglaterra'},
-  {n:100, hi:6, ai:7, d:'Jul 11', ht:'Argentina', at:'Portugal'},
-];
-// Semis P101-P102
-const SSF = [
-  {n:101, hi:0, ai:1, d:'Jul 14', ht:'Alemania',   at:'Colombia'},
-  {n:102, hi:2, ai:3, d:'Jul 15', ht:'Inglaterra', at:'Portugal'},
+// ══════════════════════════════════════════════════════
+// PREDICCIONES KO (quemadas — no cambian)
+// ══════════════════════════════════════════════════════
+const PRED_KO = [
+  // R0: 16avos
+  [{n:'P73',d:'Jun 28',ht:'Corea del Sur',at:'Canadá',ph:1,pa:0,pen:null},
+   {n:'P74',d:'Jun 29',ht:'Alemania',at:'Chequia',ph:3,pa:1,pen:null},
+   {n:'P75',d:'Jun 29',ht:'Holanda',at:'Marruecos',ph:3,pa:2,pen:null},
+   {n:'P76',d:'Jun 29',ht:'Brasil',at:'Suecia',ph:2,pa:0,pen:null},
+   {n:'P77',d:'Jun 30',ht:'Francia',at:'Escocia',ph:3,pa:2,pen:null},
+   {n:'P78',d:'Jun 30',ht:'Costa de Marfil',at:'Noruega',ph:2,pa:1,pen:null},
+   {n:'P79',d:'Jun 30',ht:'México',at:'Ecuador',ph:2,pa:1,pen:null},
+   {n:'P80',d:'Jul 1',ht:'Inglaterra',at:'Cabo Verde',ph:3,pa:1,pen:null},
+   {n:'P81',d:'Jul 1',ht:'EE.UU.',at:'Bosnia-Herzegovina',ph:2,pa:1,pen:null},
+   {n:'P82',d:'Jul 1',ht:'Bélgica',at:'Senegal',ph:1,pa:1,pen:'Senegal'},
+   {n:'P83',d:'Jul 2',ht:'Colombia',at:'Croacia',ph:3,pa:1,pen:null},
+   {n:'P84',d:'Jul 2',ht:'España',at:'Austria',ph:3,pa:0,pen:null},
+   {n:'P85',d:'Jul 2',ht:'Suiza',at:'Japón',ph:1,pa:2,pen:null},
+   {n:'P86',d:'Jul 3',ht:'Argentina',at:'Uruguay',ph:2,pa:2,pen:'Argentina'},
+   {n:'P87',d:'Jul 3',ht:'Portugal',at:'Paraguay',ph:3,pa:1,pen:null},
+   {n:'P88',d:'Jul 3',ht:'Turquía',at:'Irán',ph:2,pa:0,pen:null}],
+  // R1: Octavos
+  [{n:'P89',d:'Jul 4',ht:'Alemania',at:'Francia',ph:3,pa:2,pen:null},
+   {n:'P90',d:'Jul 4',ht:'Corea del Sur',at:'Holanda',ph:1,pa:3,pen:null},
+   {n:'P91',d:'Jul 5',ht:'Brasil',at:'Costa de Marfil',ph:3,pa:1,pen:null},
+   {n:'P92',d:'Jul 5',ht:'México',at:'Inglaterra',ph:1,pa:2,pen:null},
+   {n:'P93',d:'Jul 6',ht:'Colombia',at:'España',ph:1,pa:1,pen:'Colombia'},
+   {n:'P94',d:'Jul 6',ht:'EE.UU.',at:'Senegal',ph:0,pa:1,pen:null},
+   {n:'P95',d:'Jul 7',ht:'Argentina',at:'Japón',ph:2,pa:1,pen:null},
+   {n:'P96',d:'Jul 7',ht:'Portugal',at:'Turquía',ph:3,pa:1,pen:null}],
+  // R2: Cuartos
+  [{n:'P97',d:'Jul 9',ht:'Alemania',at:'Holanda',ph:2,pa:1,pen:null},
+   {n:'P98',d:'Jul 10',ht:'Colombia',at:'Senegal',ph:2,pa:1,pen:null},
+   {n:'P99',d:'Jul 10',ht:'Brasil',at:'Inglaterra',ph:1,pa:2,pen:null},
+   {n:'P100',d:'Jul 11',ht:'Argentina',at:'Portugal',ph:1,pa:1,pen:'Portugal'}],
+  // R3: Semis
+  [{n:'P101',d:'Jul 14',ht:'Alemania',at:'Colombia',ph:3,pa:1,pen:null},
+   {n:'P102',d:'Jul 15',ht:'Inglaterra',at:'Portugal',ph:2,pa:1,pen:null}],
+  // R4: Final
+  [{n:'P104',d:'Jul 19',ht:'Alemania',at:'Inglaterra',ph:1,pa:1,pen:'Alemania'}],
+  // R5: 3er puesto
+  [{n:'P103',d:'Jul 18',ht:'Colombia',at:'Portugal',ph:1,pa:3,pen:null}]
 ];
 
-const RPTS = [3,4,5,6,7,10];
 const RNAMES = ['16avos de Final','Octavos de Final','Cuartos de Final','Semifinales','Final','Tercer Puesto'];
+const RPTS   = [3,4,5,6,7,10];
 
-// ── ESTADO ────────────────────────────────────────────────────
-const SK = 'polla_chucha_2026';
-// pred[gid][mi]={h,a}  real[gid][mi]={h,a}
-let pred = {}, real = {};
-// koPred[r][mi]={h,a,pen,ht,at}  koReal[r][mi]={h,a,pen,ht,at}
-let koPred = {}, koReal = {};
+// ══════════════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════════════
+const SK = 'polla_chucha_2026_v5';
+let pred = {}, real = {};   // grupos
+let realKO = {};             // resultados reales KO: realKO[r][mi]={ht,at,h,a,pen}
 
-// Resultados reales quemados (se irán actualizando)
+// Resultados reales grupos quemados (se irán agregando)
 const REAL_FIXED = {};
-// Predicciones KO — completas (16avos, octavos, cuartos, semis, final, 3er puesto)
-const KOPRED_FIXED = {
-  // 16avos
-  0: {
-    0:  {h:1, a:0, pen:null,        ht:'Corea del Sur',      at:'Canadá'},
-    1:  {h:3, a:1, pen:null,        ht:'Alemania',           at:'Chequia'},
-    2:  {h:3, a:2, pen:null,        ht:'Holanda',            at:'Marruecos'},
-    3:  {h:2, a:0, pen:null,        ht:'Brasil',             at:'Suecia'},
-    4:  {h:3, a:2, pen:null,        ht:'Francia',            at:'Escocia'},
-    5:  {h:2, a:1, pen:null,        ht:'Costa de Marfil',    at:'Noruega'},
-    6:  {h:2, a:1, pen:null,        ht:'México',             at:'Ecuador'},
-    7:  {h:3, a:1, pen:null,        ht:'Inglaterra',         at:'Cabo Verde'},
-    8:  {h:2, a:1, pen:null,        ht:'EE.UU.',             at:'Bosnia-Herzegovina'},
-    9:  {h:1, a:1, pen:'Senegal',   ht:'Bélgica',            at:'Senegal'},
-    10: {h:3, a:1, pen:null,        ht:'Colombia',           at:'Croacia'},
-    11: {h:3, a:0, pen:null,        ht:'España',             at:'Austria'},
-    12: {h:1, a:2, pen:null,        ht:'Suiza',              at:'Japón'},
-    13: {h:2, a:2, pen:'Argentina', ht:'Argentina',          at:'Uruguay'},
-    14: {h:3, a:1, pen:null,        ht:'Portugal',           at:'Paraguay'},
-    15: {h:2, a:0, pen:null,        ht:'Turquía',            at:'Irán'},
-  },
-  // Octavos
-  1: {
-    0: {h:3, a:2, pen:null,        ht:'Alemania',   at:'Francia'},
-    1: {h:1, a:3, pen:null,        ht:'Corea del Sur', at:'Holanda'},
-    2: {h:3, a:1, pen:null,        ht:'Brasil',     at:'Costa de Marfil'},
-    3: {h:1, a:2, pen:null,        ht:'México',     at:'Inglaterra'},
-    4: {h:1, a:1, pen:'Colombia',  ht:'Colombia',   at:'España'},
-    5: {h:0, a:1, pen:null,        ht:'EE.UU.',     at:'Senegal'},
-    6: {h:2, a:1, pen:null,        ht:'Argentina',  at:'Japón'},
-    7: {h:3, a:1, pen:null,        ht:'Portugal',   at:'Turquía'},
-  },
-  // Cuartos
-  2: {
-    0: {h:2, a:1, pen:null,        ht:'Alemania',   at:'Holanda'},
-    1: {h:2, a:1, pen:null,        ht:'Colombia',   at:'Senegal'},
-    2: {h:1, a:2, pen:null,        ht:'Brasil',     at:'Inglaterra'},
-    3: {h:1, a:1, pen:'Portugal',  ht:'Argentina',  at:'Portugal'},
-  },
-  // Semis
-  3: {
-    0: {h:3, a:1, pen:null,        ht:'Alemania',   at:'Colombia'},
-    1: {h:2, a:1, pen:null,        ht:'Inglaterra', at:'Portugal'},
-  },
-  // Final
-  4: {
-    0: {h:1, a:1, pen:'Alemania',  ht:'Alemania',   at:'Inglaterra'},
-  },
-  // Tercer puesto
-  5: {
-    0: {h:1, a:3, pen:null,        ht:'Colombia',   at:'Portugal'},
-  }
-};
-// Resultados KO reales quemados
-const KOREAL_FIXED = {};
 
-// ── GUARDAR / CARGAR ──────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// GUARDAR / CARGAR
+// ══════════════════════════════════════════════════════
 function guardar() {
   try {
-    localStorage.setItem(SK, JSON.stringify({pred, real, koPred, koReal}));
+    localStorage.setItem(SK, JSON.stringify({real, realKO}));
     toast('✓ Guardado — Polla La Chucha');
   } catch(e) { toast('⚠ No se pudo guardar'); }
 }
@@ -362,144 +348,86 @@ function toast(m) {
   setTimeout(() => t.classList.remove('on'), 2500);
 }
 function autoSave() {
-  try { localStorage.setItem(SK, JSON.stringify({pred, real, koPred, koReal})); } catch(e) {}
+  try { localStorage.setItem(SK, JSON.stringify({real, realKO})); } catch(e) {}
 }
 function loadLS() {
   try {
     const raw = localStorage.getItem(SK);
     if (!raw) return;
     const s = JSON.parse(raw);
-    if (s.pred) Object.keys(s.pred).forEach(g => { pred[g] = Object.assign(pred[g]||{}, s.pred[g]); });
     if (s.real) Object.keys(s.real).forEach(g => { real[g] = Object.assign(real[g]||{}, s.real[g]); });
-    if (s.koPred) Object.keys(s.koPred).forEach(r => { koPred[r] = Object.assign(koPred[r]||{}, s.koPred[r]); });
-    if (s.koReal) Object.keys(s.koReal).forEach(r => { koReal[r] = Object.assign(koReal[r]||{}, s.koReal[r]); });
+    if (s.realKO) Object.keys(s.realKO).forEach(r => { realKO[r] = Object.assign(realKO[r]||{}, s.realKO[r]); });
   } catch(e) {}
 }
 
-// ── HELPERS ───────────────────────────────────────────────────
-function res(h, a) { return h > a ? 'H' : h < a ? 'A' : 'D'; }
+// ══════════════════════════════════════════════════════
+// HELPERS GRUPOS
+// ══════════════════════════════════════════════════════
+function resStr(h, a) { return h > a ? 'H' : h < a ? 'A' : 'D'; }
+
 function grpArr(gid) {
   const g = GR[gid], st = {};
   g.t.forEach(t => { st[t] = {pj:0,pg:0,pe:0,pp:0,pts:0,gf:0,gc:0}; });
   g.m.forEach((m, mi) => {
     const rk = gid+'_'+mi;
-    const s = REAL_FIXED[rk] || real[gid]?.[mi] || {h: m.ph, a: m.pa};
-    const {h, a} = s;
+    const s = REAL_FIXED[rk] || real[gid]?.[mi] || {h:m.ph, a:m.pa};
+    const {h,a} = s;
     st[m.h].pj++; st[m.a].pj++;
-    st[m.h].gf += h; st[m.h].gc += a;
-    st[m.a].gf += a; st[m.a].gc += h;
-    if (h > a) { st[m.h].pg++; st[m.h].pts += 3; st[m.a].pp++; }
-    else if (h < a) { st[m.a].pg++; st[m.a].pts += 3; st[m.h].pp++; }
-    else { st[m.h].pe++; st[m.h].pts++; st[m.a].pe++; st[m.a].pts++; }
+    st[m.h].gf+=h; st[m.h].gc+=a;
+    st[m.a].gf+=a; st[m.a].gc+=h;
+    if(h>a){st[m.h].pg++;st[m.h].pts+=3;st[m.a].pp++;}
+    else if(h<a){st[m.a].pg++;st[m.a].pts+=3;st[m.h].pp++;}
+    else{st[m.h].pe++;st[m.h].pts++;st[m.a].pe++;st[m.a].pts++;}
   });
-  return g.t.map(t => ({t, gd: st[t].gf-st[t].gc, ...st[t]}))
-    .sort((x,y) => y.pts-x.pts || y.gd-x.gd || y.gf-x.gf);
+  return g.t.map(t=>({t,gd:st[t].gf-st[t].gc,...st[t]}))
+    .sort((x,y)=>y.pts-x.pts||y.gd-x.gd||y.gf-x.gf);
 }
+
 function thirds() {
-  return Object.keys(GR).map(gid => { const a = grpArr(gid); return a[2] ? {...a[2], gid} : null; })
-    .filter(Boolean).sort((x,y) => y.pts-x.pts || y.gd-x.gd || y.gf-x.gf || x.gc-y.gc);
-}
-// Lógica de asignación de terceros:
-// Cada partido tiene una lista de grupos elegibles en orden alfabético.
-// Se recorre esa lista en orden y se toma el primer grupo disponible
-// que aún no haya sido asignado a otro partido.
-
-const THIRD_SLOTS = {
-  1:  ['A','B','C','D','F'],   // P74
-  4:  ['C','D','F','G','H'],   // P77
-  6:  ['C','E','F','H','I'],   // P79
-  7:  ['E','H','I','J','K'],   // P80
-  8:  ['B','E','F','I','J'],   // P81
-  9:  ['A','E','H','I','J'],   // P82
-  12: ['E','F','G','I','J'],   // P85
-  14: ['D','E','I','J','L'],   // P87
-};
-
-// Calcula la asignación completa de terceros de una vez,
-// en el orden en que aparecen los partidos (idx 1,4,6,7,8,9,12,14)
-function assignThirds() {
-  const usedGroups = new Set();
-  const assignment = {}; // slotIdx → team name
-
-  // Orden de los partidos que reciben terceros
-  const slotOrder = [1, 4, 6, 7, 8, 9, 12, 14];
-
-  slotOrder.forEach(slotIdx => {
-    const eligible = THIRD_SLOTS[slotIdx] || [];
-    // Tomar el primer grupo elegible que no haya sido usado
-    for (const gid of eligible) {
-      if (!usedGroups.has(gid)) {
-        // Obtener el 3ro de ese grupo
-        const arr = grpArr(gid);
-        const team = arr[2]?.t;
-        if (team) {
-          assignment[slotIdx] = team;
-          usedGroups.add(gid);
-          break;
-        }
-      }
-    }
-    // Si no se encontró ninguno, dejar indicador
-    if (!assignment[slotIdx]) assignment[slotIdx] = '3°?';
-  });
-
-  return assignment;
+  return Object.keys(GR).map(gid=>{const a=grpArr(gid);return a[2]?{...a[2],gid}:null;})
+    .filter(Boolean).sort((x,y)=>y.pts-x.pts||y.gd-x.gd||y.gf-x.gf||x.gc-y.gc);
 }
 
-function slot(s, slotIdx) {
-  if (/^[12][A-L]$/.test(s)) return grpArr(s[1])[parseInt(s[0])-1]?.t || s;
-  if (s.startsWith('3')) {
-    const assignment = assignThirds();
-    return assignment[slotIdx] || '3°?';
-  }
-  return s;
+// ══════════════════════════════════════════════════════
+// GANADOR REAL KO
+// ══════════════════════════════════════════════════════
+function realKOWinner(r, mi) {
+  const s = realKO[r]?.[mi];
+  if (!s || s.h==='' || s.h===undefined) return null;
+  const h=parseInt(s.h), a=parseInt(s.a);
+  return h>a ? s.ht : h<a ? s.at : s.pen || null;
 }
-function koW(r, mi) {
-  // Check pred fixed first to get team names for propagation
-  const fp = KOPRED_FIXED[r]?.[mi];
-  const s = KOREAL_FIXED[r]?.[mi] || koReal[r]?.[mi] || fp || koPred[r]?.[mi];
-  if (!s || s.h === '' || s.a === '' || s.h === undefined) return null;
-  const h = parseInt(s.h), a = parseInt(s.a);
-  // Use ht/at from fixed pred if available (has correct names)
-  const ht = fp?.ht || s.ht;
-  const at = fp?.at || s.at;
-  return h > a ? ht : h < a ? at : s.pen || null;
-}
-function koL(r, mi) {
-  const w = koW(r, mi);
-  const s = KOREAL_FIXED[r]?.[mi] || koReal[r]?.[mi] || KOPRED_FIXED[r]?.[mi] || koPred[r]?.[mi];
-  if (!w || !s) return null;
-  return w === s.ht ? s.at : s.ht;
+function realKOLoser(r, mi) {
+  const w = realKOWinner(r, mi);
+  const s = realKO[r]?.[mi];
+  if (!w||!s) return null;
+  return w===s.ht ? s.at : s.ht;
 }
 
-// ── BUILD GRUPOS ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// BUILD GRUPOS
+// ══════════════════════════════════════════════════════
 function buildGroups() {
-  const gTabs = document.getElementById('gTabs'), gPanels = document.getElementById('gPanels');
-  const sTabs = document.getElementById('sTabs'), sPanels = document.getElementById('sPanels');
-  Object.keys(GR).forEach((gid, gi) => {
-    pred[gid] = {}; real[gid] = real[gid] || {};
-    const g = GR[gid], first = gi === 0;
-    // Init pred from fixed values
-    g.m.forEach((m, mi) => { pred[gid][mi] = {h: m.ph, a: m.pa}; });
-
-    [{el:gTabs,type:'g'},{el:sTabs,type:'s'}].forEach(({el,type}) => {
-      const b = document.createElement('button');
-      b.textContent = 'Grupo ' + gid; if (first) b.className = 'on';
-      b.onclick = () => switchTab(gid, type); el.appendChild(b);
+  const gTabs=document.getElementById('gTabs'),gPanels=document.getElementById('gPanels');
+  const sTabs=document.getElementById('sTabs'),sPanels=document.getElementById('sPanels');
+  Object.keys(GR).forEach((gid,gi) => {
+    pred[gid]={}; real[gid]=real[gid]||{};
+    const g=GR[gid],first=gi===0;
+    GR[gid].m.forEach((m,mi)=>{pred[gid][mi]={h:m.ph,a:m.pa};});
+    [{el:gTabs,type:'g'},{el:sTabs,type:'s'}].forEach(({el,type})=>{
+      const b=document.createElement('button');
+      b.textContent='Grupo '+gid; if(first)b.className='on';
+      b.onclick=()=>switchTab(gid,type); el.appendChild(b);
     });
-
-    // Match panel
-    const p = document.createElement('div');
-    p.className = 'gpanel' + (first ? ' on' : ''); p.id = 'gp_' + gid;
-    const tit = document.createElement('div'); tit.className = 'stitle';
-    tit.textContent = 'Grupo ' + gid + ' — ' + g.t.join(', '); p.appendChild(tit);
-    g.m.forEach((m, mi) => p.appendChild(makeMatchCard(gid, mi)));
+    const p=document.createElement('div');
+    p.className='gpanel'+(first?' on':''); p.id='gp_'+gid;
+    const tit=document.createElement('div');tit.className='stitle';
+    tit.textContent='Grupo '+gid+' — '+g.t.join(', ');p.appendChild(tit);
+    g.m.forEach((m,mi)=>p.appendChild(makeMatchCard(gid,mi)));
     gPanels.appendChild(p);
-
-    // Standings panel
-    const sp = document.createElement('div');
-    sp.className = 'gpanel' + (first ? ' on' : ''); sp.id = 'sp_' + gid;
-    sp.innerHTML = `<div class="stitle">Tabla Grupo ${gid}</div>
+    const sp=document.createElement('div');
+    sp.className='gpanel'+(first?' on':''); sp.id='sp_'+gid;
+    sp.innerHTML=`<div class="stitle">Tabla Grupo ${gid}</div>
       <div class="sw"><table class="st"><thead><tr>
         <th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
         <th>Pts</th><th>GF</th><th>GC</th><th>GD</th>
@@ -509,29 +437,22 @@ function buildGroups() {
   });
 }
 
-function makeMatchCard(gid, mi) {
-  const m = GR[gid].m[mi];
-  const p = pred[gid][mi] || {h: m.ph, a: m.pa};
-  const rk = gid + '_' + mi;
-  const rv = REAL_FIXED[rk] || real[gid]?.[mi];
-
-  let ptsH = '', ptsCls = 'pend';
-  if (rv) {
-    let pts = 0;
-    if (res(p.h, p.a) === res(rv.h, rv.a)) pts += 1;
-    if (p.h === rv.h && p.a === rv.a) pts += 3;
-    ptsCls = pts > 0 ? 'hit' : 'miss';
-    ptsH = pts > 0
-      ? `<span class="pb hit">+${pts} pts</span>`
-        + (p.h === rv.h && p.a === rv.a ? '<span class="pb hit">⭐ Exacto</span>' : '')
-        + (res(p.h,p.a)===res(rv.h,rv.a) ? '<span class="pb hit">✓ Resultado</span>' : '<span class="pb miss">✗ Resultado</span>')
-      : '<span class="pb miss">0 pts</span><span class="pb miss">✗ Resultado</span>';
-  } else {
-    ptsH = '<span class="pb pend">Pendiente</span>';
+function makeMatchCard(gid,mi) {
+  const m=GR[gid].m[mi];
+  const p=pred[gid][mi]||{h:m.ph,a:m.pa};
+  const rk=gid+'_'+mi;
+  const rv=REAL_FIXED[rk]||real[gid]?.[mi];
+  let ptsH='<span class="pb pend">Pendiente</span>';
+  if(rv){
+    let pts=0;
+    if(resStr(p.h,p.a)===resStr(rv.h,rv.a))pts+=1;
+    if(p.h===rv.h&&p.a===rv.a)pts+=3;
+    ptsH=(pts>0?`<span class="pb hit">+${pts} pts</span>`:'<span class="pb miss">0 pts</span>')
+      +(p.h===rv.h&&p.a===rv.a?'<span class="pb hit">⭐ Exacto</span>':'')
+      +(resStr(p.h,p.a)===resStr(rv.h,rv.a)?'<span class="pb hit">✓ Result.</span>':'<span class="pb miss">✗ Result.</span>');
   }
-
-  const div = document.createElement('div'); div.className = 'mc'; div.id = 'mc_'+gid+'_'+mi;
-  div.innerHTML = `
+  const div=document.createElement('div');div.className='mc';div.id='mc_'+gid+'_'+mi;
+  div.innerHTML=`
     <div class="mc-meta"><span>${m.d}</span><span>${m.v}</span></div>
     <div class="rlabel">Tu predicción</div>
     <div class="mc-row row-p">
@@ -544,50 +465,45 @@ function makeMatchCard(gid, mi) {
     <div class="mc-row row-r">
       <div class="tn l">${m.h}</div>
       <div class="sb">
-        <input class="si" type="number" min="0" max="20" id="rh_${gid}_${mi}" value="${rv ? rv.h : ''}" placeholder="—" inputmode="numeric">
+        <input class="si" type="number" min="0" max="20" id="rh_${gid}_${mi}" value="${rv?rv.h:''}" placeholder="—" inputmode="numeric">
         <span class="ss">-</span>
-        <input class="si" type="number" min="0" max="20" id="ra_${gid}_${mi}" value="${rv ? rv.a : ''}" placeholder="—" inputmode="numeric">
+        <input class="si" type="number" min="0" max="20" id="ra_${gid}_${mi}" value="${rv?rv.a:''}" placeholder="—" inputmode="numeric">
       </div>
       <div class="tn r">${m.a}</div>
     </div>
     <div class="ptsr">${ptsH}</div>`;
-
-  // Attach events AFTER innerHTML
-  div.querySelector('#rh_'+gid+'_'+mi).addEventListener('input', () => onRealChange(gid, mi));
-  div.querySelector('#ra_'+gid+'_'+mi).addEventListener('input', () => onRealChange(gid, mi));
+  div.querySelector('#rh_'+gid+'_'+mi).addEventListener('input',()=>onRealGrp(gid,mi));
+  div.querySelector('#ra_'+gid+'_'+mi).addEventListener('input',()=>onRealGrp(gid,mi));
   return div;
 }
 
-function onRealChange(gid, mi) {
-  const hEl = document.getElementById('rh_'+gid+'_'+mi);
-  const aEl = document.getElementById('ra_'+gid+'_'+mi);
-  if (!hEl || !aEl) return;
-  const hv = hEl.value, av = aEl.value;
-  if (!real[gid]) real[gid] = {};
-  if (hv !== '' && av !== '') real[gid][mi] = {h: parseInt(hv), a: parseInt(av)};
+function onRealGrp(gid,mi) {
+  const h=document.getElementById('rh_'+gid+'_'+mi)?.value;
+  const a=document.getElementById('ra_'+gid+'_'+mi)?.value;
+  if(!real[gid])real[gid]={};
+  if(h!==''&&a!=='')real[gid][mi]={h:parseInt(h),a:parseInt(a)};
   else delete real[gid][mi];
-  // Rebuild just this card
-  const old = document.getElementById('mc_'+gid+'_'+mi);
-  if (old) old.parentNode.replaceChild(makeMatchCard(gid, mi), old);
+  const old=document.getElementById('mc_'+gid+'_'+mi);
+  if(old)old.parentNode.replaceChild(makeMatchCard(gid,mi),old);
   renderStand(gid); renderThirds(); calcResumen(); autoSave();
 }
 
-function switchTab(gid, type) {
-  const pi = type==='g' ? 'gPanels' : 'sPanels';
-  const ti = type==='g' ? 'gTabs' : 'sTabs';
-  const px = type==='g' ? 'gp_' : 'sp_';
-  document.querySelectorAll('#'+pi+' .gpanel').forEach(x => x.classList.remove('on'));
-  document.querySelectorAll('#'+ti+' button').forEach((b,i) => b.classList.toggle('on', Object.keys(GR)[i]===gid));
+function switchTab(gid,type) {
+  const pi=type==='g'?'gPanels':'sPanels';
+  const ti=type==='g'?'gTabs':'sTabs';
+  const px=type==='g'?'gp_':'sp_';
+  document.querySelectorAll('#'+pi+' .gpanel').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('#'+ti+' button').forEach((b,i)=>b.classList.toggle('on',Object.keys(GR)[i]===gid));
   document.getElementById(px+gid).classList.add('on');
 }
 
 function renderStand(gid) {
-  const arr = grpArr(gid), tb = document.getElementById('sb_'+gid); if (!tb) return;
-  tb.innerHTML = '';
-  arr.forEach((r,i) => {
-    const cls = i<2 ? 'c'+(i+1) : i===2 ? 'c3' : 'c4';
-    const tr = document.createElement('tr'); tr.className = cls;
-    tr.innerHTML = `<td><span class="pos">${i+1}</span>${r.t}</td>
+  const arr=grpArr(gid),tb=document.getElementById('sb_'+gid);if(!tb)return;
+  tb.innerHTML='';
+  arr.forEach((r,i)=>{
+    const cls=i<2?'c'+(i+1):i===2?'c3':'c4';
+    const tr=document.createElement('tr');tr.className=cls;
+    tr.innerHTML=`<td><span class="pos">${i+1}</span>${r.t}</td>
       <td>${r.pj}</td><td>${r.pg}</td><td>${r.pe}</td><td>${r.pp}</td>
       <td><strong>${r.pts}</strong></td><td>${r.gf}</td><td>${r.gc}</td>
       <td>${r.gd>0?'+'+r.gd:r.gd}</td>`;
@@ -596,10 +512,10 @@ function renderStand(gid) {
 }
 
 function renderThirds() {
-  const ts = thirds(), tb = document.getElementById('tBody'); tb.innerHTML = '';
-  ts.forEach((t,i) => {
-    const q = i < 8; const tr = document.createElement('tr'); tr.className = q ? 'q' : '';
-    tr.innerHTML = `<td>${i+1}</td>
+  const ts=thirds(),tb=document.getElementById('tBody');tb.innerHTML='';
+  ts.forEach((t,i)=>{
+    const q=i<8;const tr=document.createElement('tr');tr.className=q?'q':'';
+    tr.innerHTML=`<td>${i+1}</td>
       <td>${t.t}${q?'<span class="qtag">✓</span>':''}</td>
       <td>${t.gid}</td><td>${t.pg}</td><td>${t.pe}</td><td>${t.pp}</td>
       <td><strong>${t.pts}</strong></td><td>${t.gf}</td><td>${t.gc}</td>
@@ -609,260 +525,241 @@ function renderThirds() {
   });
 }
 
-// ── BUILD KO ──────────────────────────────────────────────────
-function buildKO() {
-  const wrap = document.getElementById('koWrap'); wrap.innerHTML = '';
-  for (let r = 0; r < 6; r++) { koPred[r] = koPred[r]||{}; koReal[r] = koReal[r]||{}; }
-
-  // 16avos
-  const w0 = mkRound(0); 
-  S16.forEach((m, mi) => {
-    const ht = slot(m.h, mi), at = slot(m.a, mi);
-    setKOTeams(0, mi, ht, at);
-    w0.appendChild(makeKOCard(0, mi));
+// ══════════════════════════════════════════════════════
+// BUILD PREDICCIONES KO (solo muestra, editable)
+// ══════════════════════════════════════════════════════
+function buildPredKO() {
+  const wrap=document.getElementById('predWrap');wrap.innerHTML='';
+  PRED_KO.forEach((round,r)=>{
+    const div=document.createElement('div');div.className='kor';
+    const t=document.createElement('div');t.className='kort';
+    t.innerHTML=RNAMES[r]+`<span class="koptag">+${RPTS[r]} pts</span>`;
+    div.appendChild(t);
+    round.forEach((m,mi)=>{
+      const predW=m.ph>m.pa?m.ht:m.ph<m.pa?m.at:m.pen;
+      const card=document.createElement('div');card.className='kom';
+      card.innerHTML=`
+        <div class="komh"><span>${m.n} · ${m.d}</span></div>
+        <div class="mc-row row-p">
+          <div class="tn l ${predW===m.ht?'wn':''}">${m.ht}</div>
+          <div class="sb">
+            <span class="sn">${m.ph}</span><span class="ss">-</span><span class="sn">${m.pa}</span>
+          </div>
+          <div class="tn r ${predW===m.at?'wn':''}">${m.at}</div>
+        </div>
+        ${m.pen?`<div style="text-align:center;font-size:10px;color:var(--v);padding:0 0 6px">Penales: ${m.pen}</div>`:''}`;
+      div.appendChild(card);
+    });
+    wrap.appendChild(div);
   });
-  wrap.appendChild(w0);
-
-  // Octavos
-  const w1 = mkRound(1);
-  S8.forEach((m, mi) => {
-    const ht = koW(0, m.hi) || m.ht;
-    const at = koW(0, m.ai) || m.at;
-    setKOTeams(1, mi, ht, at);
-    w1.appendChild(makeKOCard(1, mi));
-  });
-  wrap.appendChild(w1);
-
-  // Cuartos
-  const w2 = mkRound(2);
-  SQF.forEach((m, mi) => {
-    const ht = koW(1, m.hi) || m.ht;
-    const at = koW(1, m.ai) || m.at;
-    setKOTeams(2, mi, ht, at);
-    w2.appendChild(makeKOCard(2, mi));
-  });
-  wrap.appendChild(w2);
-
-  // Semis
-  const w3 = mkRound(3);
-  SSF.forEach((m, mi) => {
-    const ht = koW(2, m.hi) || m.ht;
-    const at = koW(2, m.ai) || m.at;
-    setKOTeams(3, mi, ht, at);
-    w3.appendChild(makeKOCard(3, mi));
-  });
-  wrap.appendChild(w3);
-
-  // Final P104
-  const w4 = mkRound(4);
-  { const ht = koW(3,0) || 'Alemania';
-    const at = koW(3,1) || 'Inglaterra';
-    setKOTeams(4,0,ht,at); w4.appendChild(makeKOCard(4,0,'P104 · Gran Final','Jul 19')); }
-  wrap.appendChild(w4);
-
-  // 3er puesto P103
-  const w5 = mkRound(5);
-  { const ht = koL(3,0) || 'Colombia';
-    const at = koL(3,1) || 'Portugal';
-    setKOTeams(5,0,ht,at); w5.appendChild(makeKOCard(5,0,'P103 · Tercer Puesto','Jul 18')); }
-  wrap.appendChild(w5);
 }
 
-function mkRound(r) {
-  const d = document.createElement('div'); d.className = 'kor';
-  const t = document.createElement('div'); t.className = 'kort';
-  t.innerHTML = RNAMES[r] + `<span class="koptag">+${RPTS[r]} pts</span>`;
-  d.appendChild(t); return d;
-}
+// ══════════════════════════════════════════════════════
+// BUILD RESULTADOS REALES KO (dinámico, equipos reales)
+// ══════════════════════════════════════════════════════
+function buildRealKO() {
+  const wrap=document.getElementById('realWrap');wrap.innerHTML='';
+  for(let r=0;r<6;r++){
+    if(!realKO[r])realKO[r]={};
+    const rnd=PRED_KO[r];
+    const div=document.createElement('div');div.className='kor';
+    const t=document.createElement('div');t.className='kort';
+    t.style.color='var(--d)';
+    t.innerHTML=RNAMES[r]+`<span class="koptag">+${RPTS[r]} pts</span>`;
+    div.appendChild(t);
+    rnd.forEach((pm,mi)=>{
+      // Equipos reales: para r>0 vienen de ganadores reales de ronda anterior
+      // Para r=0 se pueden editar libremente (pueden ser distintos a predicción)
+      const stored=realKO[r][mi]||{};
+      // Nombre por defecto: ganador real de ronda anterior o nombre de pred
+      let defHt=stored.ht||'';
+      let defAt=stored.at||'';
+      if(!defHt||!defAt){
+        if(r===0){defHt=pm.ht;defAt=pm.at;}
+        else if(r===5){
+          defHt=realKOLoser(3,0)||'Perdedor SF1';
+          defAt=realKOLoser(3,1)||'Perdedor SF2';
+        } else {
+          const prevRound=r-1;
+          const [hi,ai]=[[1,4],[0,2],[3,5],[6,7],[10,11],[8,9],[13,15],[12,14],
+                          [0,1],[2,3],[4,5],[6,7],[0,1],[2,3],[0,1],[2,3]][r===1?mi*2:r===2?mi*2:r===3?mi*2:0];
+          if(r===1){
+            const pairs=[[1,4],[0,2],[3,5],[6,7],[10,11],[8,9],[13,15],[12,14]];
+            defHt=realKOWinner(0,pairs[mi][0])||pm.ht;
+            defAt=realKOWinner(0,pairs[mi][1])||pm.at;
+          } else if(r===2){
+            const pairs=[[0,1],[4,5],[2,3],[6,7]];
+            defHt=realKOWinner(1,pairs[mi][0])||pm.ht;
+            defAt=realKOWinner(1,pairs[mi][1])||pm.at;
+          } else if(r===3){
+            const pairs=[[0,1],[2,3]];
+            defHt=realKOWinner(2,pairs[mi][0])||pm.ht;
+            defAt=realKOWinner(2,pairs[mi][1])||pm.at;
+          } else if(r===4){
+            defHt=realKOWinner(3,0)||pm.ht;
+            defAt=realKOWinner(3,1)||pm.at;
+          }
+        }
+      }
 
-function setKOTeams(r, mi, ht, at) {
-  if (!koPred[r][mi]) koPred[r][mi] = {h:'',a:'',pen:null,ht,at};
-  else { koPred[r][mi].ht = ht; koPred[r][mi].at = at; }
-  if (!koReal[r][mi]) koReal[r][mi] = {h:'',a:'',pen:null,ht,at};
-  else { koReal[r][mi].ht = ht; koReal[r][mi].at = at; }
-}
+      const sh=stored.h!==undefined?stored.h:'';
+      const sa=stored.a!==undefined?stored.a:'';
+      const spen=stored.pen||null;
+      const rW=sh!==''&&sa!==''?(parseInt(sh)>parseInt(sa)?defHt:parseInt(sh)<parseInt(sa)?defAt:spen):null;
+      const tied=sh!==''&&sa!==''&&parseInt(sh)===parseInt(sa);
 
-function makeKOCard(r, mi, lbl, dt) {
-  const ps = koPred[r][mi] || {h:'',a:'',pen:null,ht:'?',at:'?'};
-  const rs = KOREAL_FIXED[r]?.[mi] || koReal[r][mi] || {h:'',a:'',pen:null};
-  const fp = KOPRED_FIXED[r]?.[mi];
-  if (fp) { ps.h = fp.h; ps.a = fp.a; ps.pen = fp.pen; }
+      // Puntos: comparar ganador real vs ganador predicción
+      const predW=pm.ph>pm.pa?pm.ht:pm.ph<pm.pa?pm.at:pm.pen;
+      let ptH='<span class="pb pend">Pendiente</span>';
+      if(rW){
+        ptH=rW===predW
+          ?`<span class="pb hit">+${RPTS[r]} pts ✓</span>`
+          :'<span class="pb miss">0 pts ✗</span>';
+      }
 
-  const ht = ps.ht || '?', at = ps.at || '?';
-  const isTBD = ht.startsWith('Gan') || ht.startsWith('Per') || ht === '?';
+      const card=document.createElement('div');card.className='real-match';card.id='rm_'+r+'_'+mi;
+      card.innerHTML=`
+        <div class="real-match-header">${pm.n} · ${pm.d}</div>
+        <div class="real-row">
+          <div>
+            <input class="real-name" type="text" id="rnt_${r}_${mi}" value="${defHt}" placeholder="Equipo local">
+          </div>
+          <div></div>
+          <div>
+            <input class="real-name" type="text" id="rna_${r}_${mi}" value="${defAt}" placeholder="Equipo visitante">
+          </div>
+        </div>
+        <div class="real-row">
+          <div class="real-team l ${rW===defHt?'wn':rW?'ls':''}">${defHt}</div>
+          <div class="sb">
+            <input class="real-si" type="number" min="0" max="20" id="rsh_${r}_${mi}" value="${sh}" placeholder="—" inputmode="numeric">
+            <span class="ss" style="color:var(--d)">-</span>
+            <input class="real-si" type="number" min="0" max="20" id="rsa_${r}_${mi}" value="${sa}" placeholder="—" inputmode="numeric">
+          </div>
+          <div class="real-team r ${rW===defAt?'wn':rW?'ls':''}">${defAt}</div>
+        </div>
+        <div class="penr ${tied?'on':''}" id="rpen_${r}_${mi}">
+          <span class="penl">Penales:</span>
+          <button class="penbtn ${spen===defHt?'on':''}" id="rpb_h_${r}_${mi}">${defHt}</button>
+          <button class="penbtn ${spen===defAt?'on':''}" id="rpb_a_${r}_${mi}">${defAt}</button>
+        </div>
+        <div class="pts-compare">${ptH}<span class="pb pend" style="font-size:9px">Tu pred: ${predW||'?'}</span></div>`;
 
-  // Pred winner
-  const ph = ps.h !== '' ? parseInt(ps.h) : NaN;
-  const pa = ps.a !== '' ? parseInt(ps.a) : NaN;
-  const pTied = !isNaN(ph) && !isNaN(pa) && ph === pa;
-  const pWin = !isNaN(ph) && !isNaN(pa) ? (ph>pa?ht:ph<pa?at:ps.pen) : null;
+      // Events
+      const updateCard=()=>{
+        const ht=document.getElementById('rnt_'+r+'_'+mi)?.value||defHt;
+        const at=document.getElementById('rna_'+r+'_'+mi)?.value||defAt;
+        const hv=document.getElementById('rsh_'+r+'_'+mi)?.value;
+        const av=document.getElementById('rsa_'+r+'_'+mi)?.value;
+        if(!realKO[r])realKO[r]={};
+        realKO[r][mi]={ht,at,h:hv,a:av,pen:null};
+        const t2=!isNaN(parseInt(hv))&&!isNaN(parseInt(av))&&parseInt(hv)===parseInt(av);
+        document.getElementById('rpen_'+r+'_'+mi)?.classList.toggle('on',t2);
+        buildRealKO(); calcResumen(); autoSave();
+      };
 
-  // Real winner
-  const rh = rs.h !== '' && rs.h !== undefined ? parseInt(rs.h) : NaN;
-  const ra = rs.a !== '' && rs.a !== undefined ? parseInt(rs.a) : NaN;
-  const rTied = !isNaN(rh) && !isNaN(ra) && rh === ra;
-  const rWin = !isNaN(rh) && !isNaN(ra) ? (rh>ra?ht:rh<ra?at:rs.pen) : null;
-
-  // Points
-  let ptH = '<span class="pb pend">Pendiente</span>';
-  if (pWin && rWin) ptH = pWin===rWin ? `<span class="pb hit">+${RPTS[r]} pts ✓</span>` : '<span class="pb miss">0 pts ✗</span>';
-
-  const lbl2 = lbl || ('P'+(r===0?S16[mi].n:r===1?S8[mi].n:r===2?SQF[mi].n:SSF[mi]?.n||''));
-  const dt2 = dt || (r===0?S16[mi].d:r===1?S8[mi].d:r===2?SQF[mi].d:SSF[mi]?.d||'');
-
-  const card = document.createElement('div'); card.className = 'kom'; card.id = 'kom_'+r+'_'+mi;
-  card.innerHTML = `
-    <div class="komh"><span>${lbl2}${dt2?' · '+dt2:''}</span></div>
-    <div class="rlabel">Tu predicción</div>
-    <div class="mc-row row-p">
-      <div class="tn l ${isTBD?'tbd':pWin===ht?'wn':pWin?'ls':''}">${ht}</div>
-      <div class="sb">
-        <input class="si" type="number" min="0" max="20" id="kph_${r}_${mi}" value="${isNaN(ph)?'':ph}" placeholder="—" inputmode="numeric">
-        <span class="ss">-</span>
-        <input class="si" type="number" min="0" max="20" id="kpa_${r}_${mi}" value="${isNaN(pa)?'':pa}" placeholder="—" inputmode="numeric">
-      </div>
-      <div class="tn r ${isTBD?'tbd':pWin===at?'wn':pWin?'ls':''}">${at}</div>
-    </div>
-    <div class="penr ${pTied?'on':''}" id="pp_${r}_${mi}">
-      <span class="penl">Penales:</span>
-      <button class="penbtn ${ps.pen===ht?'on':''}" id="ppb_h_${r}_${mi}">${ht}</button>
-      <button class="penbtn ${ps.pen===at?'on':''}" id="ppb_a_${r}_${mi}">${at}</button>
-    </div>
-    <div class="div"></div>
-    <div class="rlabel">Resultado real</div>
-    <div class="mc-row row-r">
-      <div class="tn l ${isTBD?'tbd':rWin===ht?'wn':rWin?'ls':''}">${ht}</div>
-      <div class="sb">
-        <input class="si" type="number" min="0" max="20" id="krh_${r}_${mi}" value="${isNaN(rh)?'':rh}" placeholder="—" inputmode="numeric">
-        <span class="ss">-</span>
-        <input class="si" type="number" min="0" max="20" id="kra_${r}_${mi}" value="${isNaN(ra)?'':ra}" placeholder="—" inputmode="numeric">
-      </div>
-      <div class="tn r ${isTBD?'tbd':rWin===at?'wn':rWin?'ls':''}">${at}</div>
-    </div>
-    <div class="penr ${rTied?'on':''}" id="rp_${r}_${mi}">
-      <span class="penl">Penales:</span>
-      <button class="penbtn ${rs.pen===ht?'on':''}" id="rpb_h_${r}_${mi}">${ht}</button>
-      <button class="penbtn ${rs.pen===at?'on':''}" id="rpb_a_${r}_${mi}">${at}</button>
-    </div>
-    <div class="ptsr">${ptH}</div>`;
-
-  // Attach events AFTER innerHTML — key fix: addEventListener, not oninput
-  card.querySelector('#kph_'+r+'_'+mi).addEventListener('input', () => onKOPredChange(r,mi));
-  card.querySelector('#kpa_'+r+'_'+mi).addEventListener('input', () => onKOPredChange(r,mi));
-  card.querySelector('#krh_'+r+'_'+mi).addEventListener('input', () => onKORealChange(r,mi));
-  card.querySelector('#kra_'+r+'_'+mi).addEventListener('input', () => onKORealChange(r,mi));
-  card.querySelector('#ppb_h_'+r+'_'+mi).addEventListener('click', () => setPen(r,mi,'pred',ht));
-  card.querySelector('#ppb_a_'+r+'_'+mi).addEventListener('click', () => setPen(r,mi,'pred',at));
-  card.querySelector('#rpb_h_'+r+'_'+mi).addEventListener('click', () => setPen(r,mi,'real',ht));
-  card.querySelector('#rpb_a_'+r+'_'+mi).addEventListener('click', () => setPen(r,mi,'real',at));
-  return card;
-}
-
-function onKOPredChange(r, mi) {
-  const hv = document.getElementById('kph_'+r+'_'+mi)?.value;
-  const av = document.getElementById('kpa_'+r+'_'+mi)?.value;
-  if (!koPred[r]) koPred[r] = {};
-  const s = koPred[r][mi] || {};
-  koPred[r][mi] = {...s, h: hv!==undefined?hv:'', a: av!==undefined?av:'', pen: null};
-  // Update pen buttons visibility
-  const ph = parseInt(hv), pa = parseInt(av);
-  const tied = !isNaN(ph) && !isNaN(pa) && ph === pa;
-  const pp = document.getElementById('pp_'+r+'_'+mi);
-  if (pp) pp.classList.toggle('on', tied);
-  autoSave(); calcResumen();
-}
-
-function onKORealChange(r, mi) {
-  const hv = document.getElementById('krh_'+r+'_'+mi)?.value;
-  const av = document.getElementById('kra_'+r+'_'+mi)?.value;
-  if (!koReal[r]) koReal[r] = {};
-  const s = koReal[r][mi] || {};
-  koReal[r][mi] = {...s, h: hv!==undefined?hv:'', a: av!==undefined?av:'', pen: null};
-  const rh = parseInt(hv), ra = parseInt(av);
-  const tied = !isNaN(rh) && !isNaN(ra) && rh === ra;
-  const rp = document.getElementById('rp_'+r+'_'+mi);
-  if (rp) rp.classList.toggle('on', tied);
-  autoSave(); calcResumen();
-  // Rebuild next rounds if needed
-  buildKO();
-}
-
-function setPen(r, mi, type, team) {
-  if (type === 'pred') {
-    if (!koPred[r]?.[mi]) return;
-    koPred[r][mi].pen = team;
-  } else {
-    if (!koReal[r]?.[mi]) return;
-    koReal[r][mi].pen = team;
+      card.querySelector('#rnt_'+r+'_'+mi).addEventListener('change',updateCard);
+      card.querySelector('#rna_'+r+'_'+mi).addEventListener('change',updateCard);
+      card.querySelector('#rsh_'+r+'_'+mi).addEventListener('input',updateCard);
+      card.querySelector('#rsa_'+r+'_'+mi).addEventListener('input',updateCard);
+      card.querySelector('#rpb_h_'+r+'_'+mi).addEventListener('click',()=>{
+        if(!realKO[r]?.[mi])return;
+        realKO[r][mi].pen=defHt;
+        buildRealKO(); calcResumen(); autoSave();
+      });
+      card.querySelector('#rpb_a_'+r+'_'+mi).addEventListener('click',()=>{
+        if(!realKO[r]?.[mi])return;
+        realKO[r][mi].pen=defAt;
+        buildRealKO(); calcResumen(); autoSave();
+      });
+      div.appendChild(card);
+    });
+    wrap.appendChild(div);
   }
-  // Update button styles without full rebuild
-  const prefix = type === 'pred' ? 'ppb' : 'rpb';
-  const s = type === 'pred' ? koPred[r][mi] : koReal[r][mi];
-  document.getElementById(prefix+'_h_'+r+'_'+mi)?.classList.toggle('on', s.pen===s.ht);
-  document.getElementById(prefix+'_a_'+r+'_'+mi)?.classList.toggle('on', s.pen===s.at);
-  autoSave(); calcResumen();
-  if (type === 'real') buildKO();
 }
 
-// ── RESUMEN ───────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// RESUMEN
+// ══════════════════════════════════════════════════════
 function calcResumen() {
-  let total=0,res_=0,mark=0,r16=0,r8=0,qf=0,sf=0,fin=0,tpl=0;
+  let total=0,res_=0,mark=0,pts16=0,pts8=0,pts4=0,pts2=0,pts1=0,pts3=0;
   const items=[];
-  Object.keys(GR).forEach(gid => {
-    GR[gid].m.forEach((m,mi) => {
-      const rk = gid+'_'+mi;
-      const rv = REAL_FIXED[rk] || real[gid]?.[mi]; if (!rv) return;
-      const p = pred[gid][mi];
-      if (res(p.h,p.a)===res(rv.h,rv.a)) { total+=1; res_+=1; }
-      if (p.h===rv.h && p.a===rv.a) { total+=3; mark+=1; items.push(`⭐ Marcador exacto: ${m.h} ${p.h}-${p.a} ${m.a}: +3`); }
+
+  // Grupos
+  Object.keys(GR).forEach(gid=>{
+    GR[gid].m.forEach((m,mi)=>{
+      const rk=gid+'_'+mi;
+      const rv=REAL_FIXED[rk]||real[gid]?.[mi];if(!rv)return;
+      const p=pred[gid][mi];
+      if(resStr(p.h,p.a)===resStr(rv.h,rv.a)){total+=1;res_+=1;}
+      if(p.h===rv.h&&p.a===rv.a){total+=3;mark+=1;items.push(`⭐ Marcador exacto ${m.h} ${p.h}-${p.a} ${m.a}: +3`);}
     });
   });
-  if (res_>0) items.unshift(`✓ ${res_} resultado(s) correcto(s): +${res_}`);
-  [r16,r8,qf,sf,fin,tpl].forEach((_,ri) => {
-    const cnt = Object.keys(koPred[ri]||{}).filter(mi => {
-      const pw = koW(ri, parseInt(mi)); // using pred to get winner
-      return pw !== null;
-    }).length;
+  if(res_>0)items.unshift(`✓ ${res_} resultado(s) correcto(s): +${res_}`);
+
+  // KO
+  PRED_KO.forEach((round,r)=>{
+    round.forEach((pm,mi)=>{
+      const rw=realKOWinner(r,mi);if(!rw)return;
+      const predW=pm.ph>pm.pa?pm.ht:pm.ph<pm.pa?pm.at:pm.pen;
+      if(rw===predW){
+        const p=RPTS[r];
+        total+=p;
+        if(r===0)pts16+=p;else if(r===1)pts8+=p;else if(r===2)pts4+=p;
+        else if(r===3)pts2+=p;else if(r===4)pts1+=p;else pts3+=p;
+        items.push(`✓ ${pm.n} ${predW}: +${p} pts`);
+      }
+    });
   });
-  document.getElementById('tPts').textContent = total;
-  document.getElementById('mR').textContent = res_;
-  document.getElementById('mM').textContent = mark;
-  const bl = document.getElementById('bkList');
-  bl.innerHTML = items.length
-    ? items.map(i=>`<div class="bdi"><span>${i.split(':')[0]}</span><span class="bdp">${(i.split(':')[1]||'').trim()}</span></div>`).join('')
-    : '<div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div>';
+
+  document.getElementById('tPts').textContent=total;
+  document.getElementById('mR').textContent=res_;
+  document.getElementById('mM').textContent=mark;
+  document.getElementById('m16').textContent=pts16/3|0;
+  document.getElementById('m8').textContent=pts8/4|0;
+  document.getElementById('m4').textContent=pts4/5|0;
+  document.getElementById('m2').textContent=pts2/6|0;
+  document.getElementById('m1').textContent=pts1/7|0;
+  document.getElementById('m3').textContent=pts3/10|0;
+  const bl=document.getElementById('bkList');
+  bl.innerHTML=items.length
+    ?items.map(i=>`<div class="bdi"><span>${i.split(':')[0]}</span><span class="bdp">${(i.split(':')[1]||'').trim()}</span></div>`).join('')
+    :'<div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div>';
 }
 
-// ── NAVEGACIÓN ────────────────────────────────────────────────
-function showPg(id, btn) {
-  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
+// ══════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════════════
+function showPg(id,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   btn.classList.add('on');
-  if (id==='terceros') renderThirds();
-  if (id==='eliminacion') buildKO();
-  if (id==='resumen') calcResumen();
+  if(id==='terceros')renderThirds();
+  if(id==='predicciones')buildPredKO();
+  if(id==='realko')buildRealKO();
+  if(id==='resumen')calcResumen();
 }
 
-// ── INIT ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
 buildGroups();
-Object.keys(GR).forEach(gid => renderStand(gid));
+Object.keys(GR).forEach(gid=>renderStand(gid));
 renderThirds();
 loadLS();
-// Rebuild groups UI with loaded data
-Object.keys(GR).forEach(gid => {
-  GR[gid].m.forEach((m, mi) => {
-    const rv = real[gid]?.[mi];
-    if (rv) {
-      const hEl = document.getElementById('rh_'+gid+'_'+mi);
-      const aEl = document.getElementById('ra_'+gid+'_'+mi);
-      if (hEl) hEl.value = rv.h;
-      if (aEl) aEl.value = rv.a;
+Object.keys(GR).forEach(gid=>{
+  GR[gid].m.forEach((m,mi)=>{
+    const rv=real[gid]?.[mi];
+    if(rv){
+      const h=document.getElementById('rh_'+gid+'_'+mi);
+      const a=document.getElementById('ra_'+gid+'_'+mi);
+      if(h)h.value=rv.h; if(a)a.value=rv.a;
     }
   });
   renderStand(gid);
 });
-buildKO();
+buildPredKO();
 calcResumen();
 </script>
 </body>
