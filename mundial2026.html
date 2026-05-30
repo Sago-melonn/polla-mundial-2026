@@ -257,20 +257,29 @@ const S16 = [
   {n:85,h:'1B',a:'3EFGIJ',d:'Jul 2'},{n:86,h:'1J',a:'2H',d:'Jul 3'},
   {n:87,h:'1K',a:'3DEJIL',d:'Jul 3'},{n:88,h:'2D',a:'2G',d:'Jul 3'}
 ];
-// Octavos P89-P96: índices en S16
+// Octavos P89-P96
 const S8 = [
-  {n:89,hi:1,ai:4,d:'Jul 4'},{n:90,hi:0,ai:2,d:'Jul 4'},
-  {n:91,hi:3,ai:5,d:'Jul 5'},{n:92,hi:6,ai:7,d:'Jul 5'},
-  {n:93,hi:10,ai:11,d:'Jul 6'},{n:94,hi:8,ai:9,d:'Jul 6'},
-  {n:95,hi:13,ai:15,d:'Jul 7'},{n:96,hi:12,ai:14,d:'Jul 7'}
+  {n:89, hi:1,  ai:4,  d:'Jul 4',  ht:'Alemania',      at:'Francia'},
+  {n:90, hi:0,  ai:2,  d:'Jul 4',  ht:'Corea del Sur', at:'Holanda'},
+  {n:91, hi:3,  ai:5,  d:'Jul 5',  ht:'Brasil',        at:'Costa de Marfil'},
+  {n:92, hi:6,  ai:7,  d:'Jul 5',  ht:'México',        at:'Inglaterra'},
+  {n:93, hi:10, ai:11, d:'Jul 6',  ht:'Colombia',      at:'España'},
+  {n:94, hi:8,  ai:9,  d:'Jul 6',  ht:'EE.UU.',        at:'Senegal'},
+  {n:95, hi:13, ai:15, d:'Jul 7',  ht:'Argentina',     at:'Japón'},
+  {n:96, hi:12, ai:14, d:'Jul 7',  ht:'Portugal',      at:'Turquía'},
 ];
-// Cuartos P97-P100: índices en S8
+// Cuartos P97-P100
 const SQF = [
-  {n:97,hi:0,ai:1,d:'Jul 9'},{n:98,hi:4,ai:5,d:'Jul 10'},
-  {n:99,hi:2,ai:3,d:'Jul 10'},{n:100,hi:6,ai:7,d:'Jul 11'}
+  {n:97,  hi:0, ai:1, d:'Jul 9',  ht:'Alemania',  at:'Holanda'},
+  {n:98,  hi:4, ai:5, d:'Jul 10', ht:'Colombia',  at:'Senegal'},
+  {n:99,  hi:2, ai:3, d:'Jul 10', ht:'Brasil',    at:'Inglaterra'},
+  {n:100, hi:6, ai:7, d:'Jul 11', ht:'Argentina', at:'Portugal'},
 ];
-// Semis P101-P102: índices en SQF
-const SSF = [{n:101,hi:0,ai:1,d:'Jul 14'},{n:102,hi:2,ai:3,d:'Jul 15'}];
+// Semis P101-P102
+const SSF = [
+  {n:101, hi:0, ai:1, d:'Jul 14', ht:'Alemania',   at:'Colombia'},
+  {n:102, hi:2, ai:3, d:'Jul 15', ht:'Inglaterra', at:'Portugal'},
+];
 
 const RPTS = [3,4,5,6,7,10];
 const RNAMES = ['16avos de Final','Octavos de Final','Cuartos de Final','Semifinales','Final','Tercer Puesto'];
