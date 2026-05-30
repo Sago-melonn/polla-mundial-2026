@@ -339,19 +339,11 @@ function thirds() {
   return Object.keys(GR).map(gid => { const a = grpArr(gid); return a[2] ? {...a[2], gid} : null; })
     .filter(Boolean).sort((x,y) => y.pts-x.pts || y.gd-x.gd || y.gf-x.gf || x.gc-y.gc);
 }
-// Tabla oficial FIFA: para cada partido que acepta un 3ro,
-// qué grupos pueden proveer ese 3ro (confirmado por Wikipedia/ESPN)
-// Partidos que reciben terceros:
-// P74 (idx1):  3° de A,B,C,D,F
-// P77 (idx4):  3° de C,D,F,G,H
-// P79 (idx6):  3° de C,E,F,H,I
-// P80 (idx7):  3° de E,H,I,J,K
-// P81 (idx8):  3° de B,E,F,I,J
-// P82 (idx9):  3° de A,E,H,I,J
-// P85 (idx12): 3° de E,F,G,I,J
-// P87 (idx14): 3° de D,E,I,J,L
+// Lógica de asignación de terceros:
+// Cada partido tiene una lista de grupos elegibles en orden alfabético.
+// Se recorre esa lista en orden y se toma el primer grupo disponible
+// que aún no haya sido asignado a otro partido.
 
-// Mapa: índice en S16 → grupos elegibles para el 3ro
 const THIRD_SLOTS = {
   1:  ['A','B','C','D','F'],   // P74
   4:  ['C','D','F','G','H'],   // P77
@@ -363,14 +355,42 @@ const THIRD_SLOTS = {
   14: ['D','E','I','J','L'],   // P87
 };
 
+// Calcula la asignación completa de terceros de una vez,
+// en el orden en que aparecen los partidos (idx 1,4,6,7,8,9,12,14)
+function assignThirds() {
+  const usedGroups = new Set();
+  const assignment = {}; // slotIdx → team name
+
+  // Orden de los partidos que reciben terceros
+  const slotOrder = [1, 4, 6, 7, 8, 9, 12, 14];
+
+  slotOrder.forEach(slotIdx => {
+    const eligible = THIRD_SLOTS[slotIdx] || [];
+    // Tomar el primer grupo elegible que no haya sido usado
+    for (const gid of eligible) {
+      if (!usedGroups.has(gid)) {
+        // Obtener el 3ro de ese grupo
+        const arr = grpArr(gid);
+        const team = arr[2]?.t;
+        if (team) {
+          assignment[slotIdx] = team;
+          usedGroups.add(gid);
+          break;
+        }
+      }
+    }
+    // Si no se encontró ninguno, dejar indicador
+    if (!assignment[slotIdx]) assignment[slotIdx] = '3°?';
+  });
+
+  return assignment;
+}
+
 function slot(s, slotIdx) {
   if (/^[12][A-L]$/.test(s)) return grpArr(s[1])[parseInt(s[0])-1]?.t || s;
   if (s.startsWith('3')) {
-    const ts = thirds(); // ordenados por ranking
-    const eligible = THIRD_SLOTS[slotIdx] || [];
-    // Encontrar el mejor tercero cuyo grupo esté en la lista elegible
-    const match = ts.find(t => eligible.includes(t.gid));
-    return match ? match.t : (ts[0]?.t || s);
+    const assignment = assignThirds();
+    return assignment[slotIdx] || '3°?';
   }
   return s;
 }
