@@ -284,25 +284,57 @@ let koPred = {}, koReal = {};
 
 // Resultados reales quemados (se irán actualizando)
 const REAL_FIXED = {};
-// Predicciones KO — 16avos quemadas
+// Predicciones KO — completas (16avos, octavos, cuartos, semis, final, 3er puesto)
 const KOPRED_FIXED = {
+  // 16avos
   0: {
-    0:  {h:1, a:0, pen:null, ht:'Corea del Sur',      at:'Canadá'},
-    1:  {h:3, a:1, pen:null, ht:'Alemania',            at:'Chequia'},
-    2:  {h:3, a:2, pen:null, ht:'Holanda',             at:'Marruecos'},
-    3:  {h:2, a:0, pen:null, ht:'Brasil',              at:'Suecia'},
-    4:  {h:3, a:2, pen:null, ht:'Francia',             at:'Escocia'},
-    5:  {h:2, a:1, pen:null, ht:'Costa de Marfil',     at:'Noruega'},
-    6:  {h:2, a:1, pen:null, ht:'México',              at:'Ecuador'},
-    7:  {h:3, a:1, pen:null, ht:'Inglaterra',          at:'Cabo Verde'},
-    8:  {h:2, a:1, pen:null, ht:'EE.UU.',              at:'Bosnia-Herzegovina'},
-    9:  {h:1, a:1, pen:'Senegal', ht:'Bélgica',        at:'Senegal'},
-    10: {h:3, a:1, pen:null, ht:'Colombia',            at:'Croacia'},
-    11: {h:3, a:0, pen:null, ht:'España',              at:'Austria'},
-    12: {h:1, a:2, pen:null, ht:'Suiza',               at:'Japón'},
-    13: {h:2, a:2, pen:'Argentina', ht:'Argentina',    at:'Uruguay'},
-    14: {h:3, a:1, pen:null, ht:'Portugal',            at:'Paraguay'},
-    15: {h:2, a:0, pen:null, ht:'Turquía',             at:'Irán'},
+    0:  {h:1, a:0, pen:null,        ht:'Corea del Sur',      at:'Canadá'},
+    1:  {h:3, a:1, pen:null,        ht:'Alemania',           at:'Chequia'},
+    2:  {h:3, a:2, pen:null,        ht:'Holanda',            at:'Marruecos'},
+    3:  {h:2, a:0, pen:null,        ht:'Brasil',             at:'Suecia'},
+    4:  {h:3, a:2, pen:null,        ht:'Francia',            at:'Escocia'},
+    5:  {h:2, a:1, pen:null,        ht:'Costa de Marfil',    at:'Noruega'},
+    6:  {h:2, a:1, pen:null,        ht:'México',             at:'Ecuador'},
+    7:  {h:3, a:1, pen:null,        ht:'Inglaterra',         at:'Cabo Verde'},
+    8:  {h:2, a:1, pen:null,        ht:'EE.UU.',             at:'Bosnia-Herzegovina'},
+    9:  {h:1, a:1, pen:'Senegal',   ht:'Bélgica',            at:'Senegal'},
+    10: {h:3, a:1, pen:null,        ht:'Colombia',           at:'Croacia'},
+    11: {h:3, a:0, pen:null,        ht:'España',             at:'Austria'},
+    12: {h:1, a:2, pen:null,        ht:'Suiza',              at:'Japón'},
+    13: {h:2, a:2, pen:'Argentina', ht:'Argentina',          at:'Uruguay'},
+    14: {h:3, a:1, pen:null,        ht:'Portugal',           at:'Paraguay'},
+    15: {h:2, a:0, pen:null,        ht:'Turquía',            at:'Irán'},
+  },
+  // Octavos
+  1: {
+    0: {h:3, a:2, pen:null,        ht:'Alemania',   at:'Francia'},
+    1: {h:1, a:3, pen:null,        ht:'Corea del Sur', at:'Holanda'},
+    2: {h:3, a:1, pen:null,        ht:'Brasil',     at:'Costa de Marfil'},
+    3: {h:1, a:2, pen:null,        ht:'México',     at:'Inglaterra'},
+    4: {h:1, a:1, pen:'Colombia',  ht:'Colombia',   at:'España'},
+    5: {h:0, a:1, pen:null,        ht:'EE.UU.',     at:'Senegal'},
+    6: {h:2, a:1, pen:null,        ht:'Argentina',  at:'Japón'},
+    7: {h:3, a:1, pen:null,        ht:'Portugal',   at:'Turquía'},
+  },
+  // Cuartos
+  2: {
+    0: {h:2, a:1, pen:null,        ht:'Alemania',   at:'Holanda'},
+    1: {h:2, a:1, pen:null,        ht:'Colombia',   at:'Senegal'},
+    2: {h:1, a:2, pen:null,        ht:'Brasil',     at:'Inglaterra'},
+    3: {h:1, a:1, pen:'Portugal',  ht:'Argentina',  at:'Portugal'},
+  },
+  // Semis
+  3: {
+    0: {h:3, a:1, pen:null,        ht:'Alemania',   at:'Colombia'},
+    1: {h:2, a:1, pen:null,        ht:'Inglaterra', at:'Portugal'},
+  },
+  // Final
+  4: {
+    0: {h:1, a:1, pen:'Alemania',  ht:'Alemania',   at:'Inglaterra'},
+  },
+  // Tercer puesto
+  5: {
+    0: {h:1, a:3, pen:null,        ht:'Colombia',   at:'Portugal'},
   }
 };
 // Resultados KO reales quemados
