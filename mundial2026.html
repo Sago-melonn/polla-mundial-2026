@@ -455,10 +455,15 @@ function slot(s, slotIdx) {
   return s;
 }
 function koW(r, mi) {
-  const s = KOREAL_FIXED[r]?.[mi] || koReal[r]?.[mi] || KOPRED_FIXED[r]?.[mi] || koPred[r]?.[mi];
+  // Check pred fixed first to get team names for propagation
+  const fp = KOPRED_FIXED[r]?.[mi];
+  const s = KOREAL_FIXED[r]?.[mi] || koReal[r]?.[mi] || fp || koPred[r]?.[mi];
   if (!s || s.h === '' || s.a === '' || s.h === undefined) return null;
   const h = parseInt(s.h), a = parseInt(s.a);
-  return h > a ? s.ht : h < a ? s.at : s.pen || null;
+  // Use ht/at from fixed pred if available (has correct names)
+  const ht = fp?.ht || s.ht;
+  const at = fp?.at || s.at;
+  return h > a ? ht : h < a ? at : s.pen || null;
 }
 function koL(r, mi) {
   const w = koW(r, mi);
@@ -621,8 +626,8 @@ function buildKO() {
   // Octavos
   const w1 = mkRound(1);
   S8.forEach((m, mi) => {
-    const ht = koW(0, m.hi) || 'Gan.P'+S16[m.hi].n;
-    const at = koW(0, m.ai) || 'Gan.P'+S16[m.ai].n;
+    const ht = koW(0, m.hi) || m.ht;
+    const at = koW(0, m.ai) || m.at;
     setKOTeams(1, mi, ht, at);
     w1.appendChild(makeKOCard(1, mi));
   });
@@ -631,8 +636,8 @@ function buildKO() {
   // Cuartos
   const w2 = mkRound(2);
   SQF.forEach((m, mi) => {
-    const ht = koW(1, m.hi) || 'Gan.P'+S8[m.hi].n;
-    const at = koW(1, m.ai) || 'Gan.P'+S8[m.ai].n;
+    const ht = koW(1, m.hi) || m.ht;
+    const at = koW(1, m.ai) || m.at;
     setKOTeams(2, mi, ht, at);
     w2.appendChild(makeKOCard(2, mi));
   });
@@ -641,8 +646,8 @@ function buildKO() {
   // Semis
   const w3 = mkRound(3);
   SSF.forEach((m, mi) => {
-    const ht = koW(2, m.hi) || 'Gan.P'+SQF[m.hi].n;
-    const at = koW(2, m.ai) || 'Gan.P'+SQF[m.ai].n;
+    const ht = koW(2, m.hi) || m.ht;
+    const at = koW(2, m.ai) || m.at;
     setKOTeams(3, mi, ht, at);
     w3.appendChild(makeKOCard(3, mi));
   });
@@ -650,13 +655,15 @@ function buildKO() {
 
   // Final P104
   const w4 = mkRound(4);
-  { const ht = koW(3,0)||'Gan.P101', at = koW(3,1)||'Gan.P102';
+  { const ht = koW(3,0) || 'Alemania';
+    const at = koW(3,1) || 'Inglaterra';
     setKOTeams(4,0,ht,at); w4.appendChild(makeKOCard(4,0,'P104 · Gran Final','Jul 19')); }
   wrap.appendChild(w4);
 
   // 3er puesto P103
   const w5 = mkRound(5);
-  { const ht = koL(3,0)||'Per.P101', at = koL(3,1)||'Per.P102';
+  { const ht = koL(3,0) || 'Colombia';
+    const at = koL(3,1) || 'Portugal';
     setKOTeams(5,0,ht,at); w5.appendChild(makeKOCard(5,0,'P103 · Tercer Puesto','Jul 18')); }
   wrap.appendChild(w5);
 }
