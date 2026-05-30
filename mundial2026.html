@@ -741,51 +741,71 @@ function setTeams(r, mi, home, away) {
   else { koScores[r][mi].homeTeam = home; koScores[r][mi].awayTeam = away; }
 }
 
-function buildKOCard(r,mi,home,away,label,date,venue,pred,real){
-  const card=document.createElement('div');card.className='ko-match';card.id='ko_'+r+'_'+mi;
-  const isTBD=home.startsWith('Gan')||home.startsWith('Per')||home==='?';
+function buildKOCard(r, mi, home, away, label, date, venue) {
+  const card = document.createElement('div');
+  card.className = 'ko-match';
+  card.id = 'ko_' + r + '_' + mi;
+  const isTBD = home.startsWith('Gan') || home.startsWith('Per') || home === '?';
 
-  // Puntos KO
-  let pts=0,ptsClass='pending',ptsText='Pendiente';
-  if(pred&&real){
-    const predWinner=parseInt(pred.h)>parseInt(pred.a)?pred.homeTeam:parseInt(pred.h)<parseInt(pred.a)?pred.awayTeam:pred.pen;
-    const realWinner=parseInt(real.h)>parseInt(real.a)?real.homeTeam:parseInt(real.h)<parseInt(real.a)?real.awayTeam:real.pen;
-    if(predWinner&&realWinner&&predWinner===realWinner){pts=ROUND_PTS[r];ptsClass='hit';ptsText='+'+pts+' pts';}
-    else if(realWinner){ptsClass='miss';ptsText='0 pts';}
+  // Get stored pred score
+  const ps = koScores[r]?.[mi] || {};
+  const ph = ps.h !== undefined ? ps.h : '';
+  const pa = ps.a !== undefined ? ps.a : '';
+  const ppen = ps.pen || null;
+  const predTied = ph !== '' && pa !== '' && parseInt(ph) === parseInt(pa);
+  const predWinner = ph !== '' && pa !== ''
+    ? (parseInt(ph) > parseInt(pa) ? home : parseInt(ph) < parseInt(pa) ? away : ppen)
+    : null;
+
+  // Get stored real score
+  const rs = koReal[r]?.[mi] || KO_REAL[r]?.[mi] || {};
+  const rh = rs.h !== undefined ? rs.h : '';
+  const ra = rs.a !== undefined ? rs.a : '';
+  const rpen = rs.pen || null;
+  const realTied = rh !== '' && ra !== '' && parseInt(rh) === parseInt(ra);
+  const realWinner = rh !== '' && ra !== ''
+    ? (parseInt(rh) > parseInt(ra) ? home : parseInt(rh) < parseInt(ra) ? away : rpen)
+    : null;
+
+  // Points
+  let ptsClass = 'pending', ptsText = 'Pendiente';
+  if (predWinner && realWinner) {
+    if (predWinner === realWinner) { ptsClass = 'hit'; ptsText = '+' + ROUND_PTS[r] + ' pts'; }
+    else { ptsClass = 'miss'; ptsText = '0 pts'; }
   }
 
-  const predWinner=pred?(parseInt(pred.h)>parseInt(pred.a)?home:parseInt(pred.h)<parseInt(pred.a)?away:pred.pen):null;
-  const isTied=pred&&pred.h!==''&&pred.a!==''&&parseInt(pred.h)===parseInt(pred.a);
-
-  card.innerHTML=`
-    <div class="ko-header"><span>${label}${date?' · '+date:''}</span><span>${venue}</span></div>
-    ${pred?`
+  card.innerHTML = `
+    <div class="ko-header"><span>${label}${date ? ' · ' + date : ''}</span><span>${venue}</span></div>
     <div class="row-label">Tu predicción</div>
     <div class="ko-row row-pred">
-      <div class="ko-team home ${isTBD?'tbd':predWinner===home?'winner':predWinner?'loser':''}">${home}</div>
-      <div class="score-display">
-        <span class="score-num">${pred.h}</span>
-        <span class="score-sep">-</span>
-        <span class="score-num">${pred.a}</span>
-      </div>
-      <div class="ko-team away ${isTBD?'tbd':predWinner===away?'winner':predWinner?'loser':''}">${away}</div>
-    </div>
-    ${isTied&&pred.pen?`<div style="text-align:center;font-size:10px;color:var(--verde);padding:2px 0">Penales: ${pred.pen}</div>`:''}
-    <div class="divider"></div>`:''}
-    <div class="row-label">Tu predicción · Ingresa resultado</div>
-    <div class="ko-row">
-      <div class="ko-team home ${isTBD?'tbd':''}">${home}</div>
+      <div class="ko-team home ${isTBD ? 'tbd' : predWinner === home ? 'winner' : predWinner ? 'loser' : ''}">${home}</div>
       <div class="score-box">
-        <input class="ko-input" type="number" min="0" max="20" id="koph_${r}_${mi}" value="${pred?pred.h:''}" placeholder="—" inputmode="numeric" oninput="onKOPred(${r},${mi})">
+        <input class="ko-input" type="number" min="0" max="20" id="koph_${r}_${mi}" value="${ph}" placeholder="—" inputmode="numeric" oninput="onKOPred(${r},${mi})">
         <span class="score-sep">-</span>
-        <input class="ko-input" type="number" min="0" max="20" id="kopa_${r}_${mi}" value="${pred?pred.a:''}" placeholder="—" inputmode="numeric" oninput="onKOPred(${r},${mi})">
+        <input class="ko-input" type="number" min="0" max="20" id="kopa_${r}_${mi}" value="${pa}" placeholder="—" inputmode="numeric" oninput="onKOPred(${r},${mi})">
       </div>
-      <div class="ko-team away ${isTBD?'tbd':''}">${away}</div>
+      <div class="ko-team away ${isTBD ? 'tbd' : predWinner === away ? 'winner' : predWinner ? 'loser' : ''}">${away}</div>
     </div>
-    <div class="pen-row ${isTied?'show':''}" id="penrow_${r}_${mi}">
+    <div class="pen-row ${predTied ? 'show' : ''}" id="penrow_pred_${r}_${mi}">
       <span class="pen-label">Penales:</span>
-      <button class="pen-btn ${pred?.pen===home?'active':''}" onclick="setKOPen(${r},${mi},'${home}')">${home}</button>
-      <button class="pen-btn ${pred?.pen===away?'active':''}" onclick="setKOPen(${r},${mi},'${away}')">${away}</button>
+      <button class="pen-btn ${ppen === home ? 'active' : ''}" onclick="setKOPen(${r},${mi},'${home}','pred')">${home}</button>
+      <button class="pen-btn ${ppen === away ? 'active' : ''}" onclick="setKOPen(${r},${mi},'${away}','pred')">${away}</button>
+    </div>
+    <div class="divider"></div>
+    <div class="row-label">Resultado real</div>
+    <div class="ko-row row-real">
+      <div class="ko-team home ${isTBD ? 'tbd' : realWinner === home ? 'winner' : realWinner ? 'loser' : ''}">${home}</div>
+      <div class="score-box">
+        <input class="ko-input" type="number" min="0" max="20" id="korh_${r}_${mi}" value="${rh}" placeholder="—" inputmode="numeric" oninput="onKOReal(${r},${mi})">
+        <span class="score-sep">-</span>
+        <input class="ko-input" type="number" min="0" max="20" id="kora_${r}_${mi}" value="${ra}" placeholder="—" inputmode="numeric" oninput="onKOReal(${r},${mi})">
+      </div>
+      <div class="ko-team away ${isTBD ? 'tbd' : realWinner === away ? 'winner' : realWinner ? 'loser' : ''}">${away}</div>
+    </div>
+    <div class="pen-row ${realTied ? 'show' : ''}" id="penrow_real_${r}_${mi}">
+      <span class="pen-label">Penales:</span>
+      <button class="pen-btn ${rpen === home ? 'active' : ''}" onclick="setKOPen(${r},${mi},'${home}','real')">${home}</button>
+      <button class="pen-btn ${rpen === away ? 'active' : ''}" onclick="setKOPen(${r},${mi},'${away}','real')">${away}</button>
     </div>
     <div class="pts-row">
       <span class="pts-badge ${ptsClass}">${ptsText}</span>
@@ -793,18 +813,33 @@ function buildKOCard(r,mi,home,away,label,date,venue,pred,real){
   return card;
 }
 
-function onKOPred(r,mi){
-  const hv=document.getElementById('koph_'+r+'_'+mi).value;
-  const av=document.getElementById('kopa_'+r+'_'+mi).value;
-  if(!koScores[r])koScores[r]={};
-  const s=koScores[r][mi]||{};
-  koScores[r][mi]={...s,h:hv,a:av,pen:null};
-  buildKO();autoSave();calcResumen();
+function onKOPred(r, mi) {
+  const hv = document.getElementById('koph_' + r + '_' + mi).value;
+  const av = document.getElementById('kopa_' + r + '_' + mi).value;
+  if (!koScores[r]) koScores[r] = {};
+  const s = koScores[r][mi] || {};
+  koScores[r][mi] = {...s, h: hv, a: av, pen: null, homeTeam: s.homeTeam, awayTeam: s.awayTeam};
+  buildKO(); autoSave(); calcResumen();
 }
-function setKOPen(r,mi,team){
-  if(!koScores[r]?.[mi])return;
-  koScores[r][mi].pen=team;
-  buildKO();autoSave();calcResumen();
+function onKOReal(r, mi) {
+  const hv = document.getElementById('korh_' + r + '_' + mi).value;
+  const av = document.getElementById('kora_' + r + '_' + mi).value;
+  if (!koReal[r]) koReal[r] = {};
+  const s = koReal[r][mi] || {};
+  const teams = koScores[r]?.[mi] || {};
+  koReal[r][mi] = {...s, h: hv, a: av, pen: null, homeTeam: teams.homeTeam, awayTeam: teams.awayTeam};
+  buildKO(); autoSave(); calcResumen();
+}
+function setKOPen(r, mi, team, type) {
+  if (type === 'pred') {
+    if (!koScores[r]?.[mi]) return;
+    koScores[r][mi].pen = team;
+  } else {
+    if (!koReal[r]) koReal[r] = {};
+    if (!koReal[r][mi]) koReal[r][mi] = {};
+    koReal[r][mi].pen = team;
+  }
+  buildKO(); autoSave(); calcResumen();
 }
 
 // ═══════════════════════════════════════════════════════
