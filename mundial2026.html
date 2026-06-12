@@ -1043,6 +1043,7 @@ function showDetail(type, btn) {
 // ══════════════════════════════════════════════════════
 function buildDetalle() {
   const wrap=document.getElementById('detalleWrap'); wrap.innerHTML='';
+  let grandTotal=0;
 
   // ── Grupos ──────────────────────────────────────────
   Object.keys(GR).forEach(gid=>{
@@ -1058,6 +1059,7 @@ function buildDetalle() {
       let pts=0, det=[];
       if(exact){pts=3;det.push('Marcador exacto +3');}
       else if(resOk){pts=1;det.push('Resultado +1');}
+      grandTotal+=pts;
       groupItems.push({
         label:`${m.h} ${rv.h}-${rv.a} ${m.a}`,
         pred:`Predicción: ${p.h}-${p.a}`,
@@ -1108,6 +1110,7 @@ function buildDetalle() {
         if(realFourth&&realFourth===predFourth){pts+=PTS_CUARTO;det.push(`Cuarto puesto +${PTS_CUARTO}`);}
       }
 
+      grandTotal+=pts;
       roundItems.push({
         label:`${pm.n}: ${rs.ht||pm.ht} ${rscore} ${rs.at||pm.at}${rs.pen?' (pen. '+rs.pen+')':''}`,
         pred:`Tu pred: ${pm.ht} ${pm.ph}-${pm.pa} ${pm.at}${pm.pen?' (pen. '+pm.pen+')':''}`,
@@ -1124,6 +1127,7 @@ function buildDetalle() {
         const predFinalists=[predFin.ht, predFin.at];
         realFinalists.forEach(team=>{
           if(predFinalists.includes(team)){
+            grandTotal+=7;
             roundItems.push({
               label:`Finalista: ${team}`,
               pred:`Predicho como finalista`,
@@ -1155,6 +1159,12 @@ function buildDetalle() {
 
   if(!wrap.innerHTML){
     wrap.innerHTML='<div style="color:var(--t2);font-size:12px;text-align:center;padding:20px;">Aún no hay resultados reales ingresados.</div>';
+  } else {
+    const totalCard=document.createElement('div');
+    totalCard.className='hero';
+    totalCard.style.marginTop='14px';
+    totalCard.innerHTML=`<div class="big">${grandTotal}</div><div class="lbl">TOTAL ACUMULADO — PARTIDOS JUGADOS</div>`;
+    wrap.insertBefore(totalCard, wrap.firstChild);
   }
 }
 
