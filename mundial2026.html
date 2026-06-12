@@ -145,6 +145,7 @@ input.real-name:focus{border-color:var(--d);}
   <button onclick="showPg('predicciones',this)">Predicciones</button>
   <button onclick="showPg('realko',this)">Resultados Reales</button>
   <button onclick="showPg('resumen',this)">Resumen</button>
+  <button onclick="showPg('detalle',this)">Detalle Pts</button>
 </nav>
 
 <div id="grupos" class="pg on"><div class="gtabs" id="gTabs"></div><div id="gPanels"></div></div>
@@ -186,6 +187,16 @@ input.real-name:focus{border-color:var(--d);}
     <div class="met"><div class="val" id="mCuarto">0</div><div class="lbl">Cuarto puesto (+7)</div></div>
   </div>
   <div class="bkd"><h3>Desglose</h3><div id="bkList"><div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div></div></div>
+</div>
+
+<div id="detalle" class="pg">
+  <div class="stitle">Detalle de Puntos por Partido</div>
+  <div class="gtabs" id="dTabs">
+    <button class="on" onclick="showDetail('grp',this)">Fase Grupos</button>
+    <button onclick="showDetail('ko',this)">Eliminación</button>
+  </div>
+  <div id="detalleGrp"></div>
+  <div id="detalleKO" style="display:none;"></div>
 </div>
 
 <script>
@@ -861,6 +872,164 @@ function calcResumen() {
 }
 
 // ══════════════════════════════════════════════════════
+// DETALLE DE PUNTOS POR PARTIDO
+// ══════════════════════════════════════════════════════
+function renderDetalleGrupos() {
+  const wrap = document.getElementById('detalleGrp');
+  wrap.innerHTML = '';
+  let subtotal = 0;
+  Object.keys(GR).forEach(gid => {
+    const g = GR[gid];
+    let groupHasResults = false;
+    const rows = [];
+    g.m.forEach((m, mi) => {
+      const rk = gid+'_'+mi;
+      const rv = REAL_FIXED[rk] || real[gid]?.[mi];
+      if (!rv) return;
+      groupHasResults = true;
+      const p = pred[gid][mi];
+      let pts = 0;
+      let detail = [];
+      if (resStr(p.h,p.a)===resStr(rv.h,rv.a)) { pts += 1; detail.push('+1 resultado'); }
+      if (p.h===rv.h && p.a===rv.a) { pts += 3; detail.push('+3 marcador'); }
+      subtotal += pts;
+      rows.push({m, p, rv, pts, detail});
+    });
+    if (!groupHasResults) return;
+
+    const div = document.createElement('div'); div.className = 'kor';
+    const t = document.createElement('div'); t.className = 'kort';
+    t.style.color = 'var(--v)';
+    t.textContent = 'Grupo ' + gid;
+    div.appendChild(t);
+
+    rows.forEach(({m,p,rv,pts,detail}) => {
+      const card = document.createElement('div'); card.className = 'kom';
+      const ptsClass = pts > 0 ? 'hit' : 'miss';
+      card.innerHTML = `
+        <div class="komh"><span>${m.h} vs ${m.a} · ${m.d}</span></div>
+        <div class="mc-row row-p" style="padding:6px 10px 2px;">
+          <div class="tn l">Pred: ${p.h}-${p.a}</div>
+          <div></div>
+          <div class="tn r">Real: ${rv.h}-${rv.a}</div>
+        </div>
+        <div class="ptsr">
+          <span class="pb ${ptsClass}">${pts>0?'+':''}${pts} pts</span>
+          ${detail.map(d=>`<span class="pb hit" style="font-size:9px">${d}</span>`).join('')}
+          ${detail.length===0?'<span class="pb miss" style="font-size:9px">sin acierto</span>':''}
+        </div>`;
+      div.appendChild(card);
+    });
+
+    // Subtotal por grupo
+    const groupSubtotal = rows.reduce((a,r)=>a+r.pts,0);
+    const sumDiv = document.createElement('div');
+    sumDiv.style.cssText = 'text-align:right;font-size:11px;color:var(--t2);padding:2px 4px 0;';
+    sumDiv.innerHTML = `Subtotal Grupo ${gid}: <strong style="color:var(--v)">${groupSubtotal} pts</strong>`;
+    div.appendChild(sumDiv);
+
+    wrap.appendChild(div);
+  });
+
+  if (wrap.innerHTML === '') {
+    wrap.innerHTML = '<div class="ibox">Aún no hay resultados reales de fase de grupos ingresados.</div>';
+  } else {
+    const totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'text-align:center;padding:12px;font-family:"Bebas Neue",sans-serif;font-size:18px;color:var(--v);border-top:1px solid var(--br);margin-top:8px;';
+    totalDiv.innerHTML = `TOTAL FASE GRUPOS: ${subtotal} pts`;
+    wrap.appendChild(totalDiv);
+  }
+}
+
+function renderDetalleKO() {
+  const wrap = document.getElementById('detalleKO');
+  wrap.innerHTML = '';
+  let subtotal = 0;
+  let any = false;
+
+  PRED_KO.forEach((round, r) => {
+    const roundRows = [];
+    round.forEach((pm, mi) => {
+      const rw = realKOWinner(r, mi);
+      if (!rw) return;
+      any = true;
+      const predW = pm.ph>pm.pa ? pm.ht : pm.ph<pm.pa ? pm.at : pm.pen;
+      const rs = realKO[r]?.[mi] || {};
+      let pts = 0, label = '';
+      if (r===0) { if(rw===predW){pts=3;label='Clasifica a octavos';} }
+      else if (r===1) { if(rw===predW){pts=4;label='Clasifica a cuartos';} }
+      else if (r===2) { if(rw===predW){pts=5;label='Clasifica a semis';} }
+      else if (r===3) { if(rw===predW){pts=6;label='Clasifica a final';} }
+      else if (r===4) {
+        if(rw===predW){pts+=PTS_CAMPEON;label='🏆 Campeón';}
+        const realLoser=realKOLoser(4,0);
+        const predLoser=pm.ph>pm.pa?pm.at:pm.ph<pm.pa?pm.ht:(pm.pen===pm.ht?pm.at:pm.ht);
+        if(realLoser&&realLoser===predLoser){pts+=PTS_SUBCAMPEON;label=(label?label+' + ':'')+'🥈 Subcampeón';}
+      }
+      else if (r===5) {
+        if(rw===predW){pts+=PTS_TERCERO;label='🥉 Tercer puesto';}
+        const realFourth=realKOLoser(5,0);
+        const predFourth=pm.ph>pm.pa?pm.at:pm.ph<pm.pa?pm.ht:(pm.pen===pm.ht?pm.at:pm.ht);
+        if(realFourth&&realFourth===predFourth){pts+=PTS_CUARTO;label=(label?label+' + ':'')+'4° Cuarto puesto';}
+      }
+      subtotal += pts;
+      roundRows.push({pm, rs, rw, predW, pts, label});
+    });
+
+    if (roundRows.length===0) return;
+
+    const div = document.createElement('div'); div.className = 'kor';
+    const t = document.createElement('div'); t.className = 'kort';
+    t.innerHTML = RNAMES[r];
+    div.appendChild(t);
+
+    roundRows.forEach(({pm,rs,rw,predW,pts,label}) => {
+      const ptsClass = pts > 0 ? 'hit' : 'miss';
+      const ht = rs.ht || pm.ht, at = rs.at || pm.at;
+      const card = document.createElement('div'); card.className = 'kom';
+      card.innerHTML = `
+        <div class="komh"><span>${pm.n} · ${ht} vs ${at}</span></div>
+        <div class="mc-row row-p" style="padding:6px 10px 2px;">
+          <div class="tn l">Pred: ${predW}</div>
+          <div></div>
+          <div class="tn r">Real: ${rw}</div>
+        </div>
+        <div class="ptsr">
+          <span class="pb ${ptsClass}">${pts>0?'+':''}${pts} pts</span>
+          ${label?`<span class="pb hit" style="font-size:9px">${label}</span>`:'<span class="pb miss" style="font-size:9px">sin acierto</span>'}
+        </div>`;
+      div.appendChild(card);
+    });
+
+    const roundSubtotal = roundRows.reduce((a,r)=>a+r.pts,0);
+    const sumDiv = document.createElement('div');
+    sumDiv.style.cssText = 'text-align:right;font-size:11px;color:var(--t2);padding:2px 4px 0;';
+    sumDiv.innerHTML = `Subtotal ${RNAMES[r]}: <strong style="color:var(--d)">${roundSubtotal} pts</strong>`;
+    div.appendChild(sumDiv);
+
+    wrap.appendChild(div);
+  });
+
+  if (!any) {
+    wrap.innerHTML = '<div class="ibox">Aún no hay resultados reales de eliminación ingresados.</div>';
+  } else {
+    const totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'text-align:center;padding:12px;font-family:"Bebas Neue",sans-serif;font-size:18px;color:var(--d);border-top:1px solid var(--br);margin-top:8px;';
+    totalDiv.innerHTML = `TOTAL ELIMINACIÓN: ${subtotal} pts`;
+    wrap.appendChild(totalDiv);
+  }
+}
+
+function showDetail(type, btn) {
+  document.querySelectorAll('#dTabs button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('detalleGrp').style.display = type==='grp' ? 'block' : 'none';
+  document.getElementById('detalleKO').style.display = type==='ko' ? 'block' : 'none';
+  if (type==='grp') renderDetalleGrupos();
+  else renderDetalleKO();
+}
+
+// ══════════════════════════════════════════════════════
 // NAVEGACIÓN
 // ══════════════════════════════════════════════════════
 function showPg(id,btn){
@@ -872,6 +1041,7 @@ function showPg(id,btn){
   if(id==='predicciones')buildPredKO();
   if(id==='realko')buildRealKO();
   if(id==='resumen')calcResumen();
+  if(id==='detalle')renderDetalleGrupos();
 }
 
 // ══════════════════════════════════════════════════════
