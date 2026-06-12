@@ -171,6 +171,11 @@ input.real-name:focus{border-color:var(--d);}
   <div id="realWrap"></div>
 </div>
 
+<div id="detalle" class="pg">
+  <div class="ibox">Puntos obtenidos en cada partido jugado, según las reglas del apoyo.</div>
+  <div id="detalleWrap"></div>
+</div>
+
 <div id="resumen" class="pg">
   <div class="hero"><div class="big" id="tPts">0</div><div class="lbl">PUNTOS — POLLA LA CHUCHA</div></div>
   <div class="mets">
@@ -1030,6 +1035,124 @@ function showDetail(type, btn) {
 }
 
 // ══════════════════════════════════════════════════════
+// DETALLE POR PARTIDO
+// ══════════════════════════════════════════════════════
+function buildDetalle() {
+  const wrap=document.getElementById('detalleWrap'); wrap.innerHTML='';
+
+  // ── Grupos ──────────────────────────────────────────
+  Object.keys(GR).forEach(gid=>{
+    const g=GR[gid];
+    let groupItems=[];
+    g.m.forEach((m,mi)=>{
+      const rk=gid+'_'+mi;
+      const rv=REAL_FIXED[rk]||real[gid]?.[mi];
+      if(!rv)return;
+      const p=pred[gid][mi];
+      let pts=0, det=[];
+      if(resStr(p.h,p.a)===resStr(rv.h,rv.a)){pts+=1;det.push('Resultado +1');}
+      if(p.h===rv.h&&p.a===rv.a){pts+=3;det.push('Marcador exacto +3');}
+      groupItems.push({
+        label:`${m.h} ${rv.h}-${rv.a} ${m.a}`,
+        pred:`Predicción: ${p.h}-${p.a}`,
+        pts, det: det.length?det.join(' · '):'Sin acierto'
+      });
+    });
+    if(groupItems.length){
+      const div=document.createElement('div');div.className='kor';
+      const t=document.createElement('div');t.className='kort';t.textContent='Grupo '+gid;
+      div.appendChild(t);
+      groupItems.forEach(it=>{
+        const c=document.createElement('div');c.className='kom';
+        c.innerHTML=`<div class="komh"><span>${it.label}</span><span>${it.pred}</span></div>
+          <div class="ptsr" style="padding-top:6px;">
+            <span class="pb ${it.pts>0?'hit':'miss'}">${it.pts>0?'+'+it.pts+' pts':'0 pts'}</span>
+            <span class="pb pend" style="font-size:9px">${it.det}</span>
+          </div>`;
+        div.appendChild(c);
+      });
+      wrap.appendChild(div);
+    }
+  });
+
+  // ── Eliminación ─────────────────────────────────────
+  PRED_KO.forEach((round,r)=>{
+    let roundItems=[];
+    round.forEach((pm,mi)=>{
+      const rw=realKOWinner(r,mi); if(!rw) return;
+      const predW=pm.ph>pm.pa?pm.ht:pm.ph<pm.pa?pm.at:pm.pen;
+      const rs=realKO[r]?.[mi]||{};
+      const rscore=`${rs.h}-${rs.a}`;
+
+      let pts=0, det=[];
+      if(r===0&&rw===predW){pts+=3;det.push('Clasif. 16avos +3');}
+      if(r===1&&rw===predW){pts+=4;det.push('Clasif. octavos +4');}
+      if(r===2&&rw===predW){pts+=5;det.push('Clasif. cuartos +5');}
+      if(r===3&&rw===predW){pts+=6;det.push('Clasif. semis +6');}
+      if(r===4){
+        if(rw===predW){pts+=PTS_CAMPEON;det.push(`Campeón +${PTS_CAMPEON}`);}
+        const realLoser=realKOLoser(4,0);
+        const predLoser=pm.ph>pm.pa?pm.at:pm.ph<pm.pa?pm.ht:(pm.pen===pm.ht?pm.at:pm.ht);
+        if(realLoser&&realLoser===predLoser){pts+=PTS_SUBCAMPEON;det.push(`Subcampeón +${PTS_SUBCAMPEON}`);}
+      }
+      if(r===5){
+        if(rw===predW){pts+=PTS_TERCERO;det.push(`Tercer puesto +${PTS_TERCERO}`);}
+        const realFourth=realKOLoser(5,0);
+        const predFourth=pm.ph>pm.pa?pm.at:pm.ph<pm.pa?pm.ht:(pm.pen===pm.ht?pm.at:pm.ht);
+        if(realFourth&&realFourth===predFourth){pts+=PTS_CUARTO;det.push(`Cuarto puesto +${PTS_CUARTO}`);}
+      }
+
+      roundItems.push({
+        label:`${pm.n}: ${rs.ht||pm.ht} ${rscore} ${rs.at||pm.at}${rs.pen?' (pen. '+rs.pen+')':''}`,
+        pred:`Tu pred: ${pm.ht} ${pm.ph}-${pm.pa} ${pm.at}${pm.pen?' (pen. '+pm.pen+')':''}`,
+        pts, det: det.length?det.join(' · '):'Sin acierto'
+      });
+    });
+
+    // Finalistas +7 (regla especial, se muestra junto a la final)
+    if(r===4){
+      const realFin0=realKO[4]?.[0];
+      if(realFin0&&realFin0.ht&&realFin0.at&&realFin0.h!==''&&realFin0.h!==undefined){
+        const realFinalists=[realFin0.ht, realFin0.at];
+        const predFin=PRED_KO[4][0];
+        const predFinalists=[predFin.ht, predFin.at];
+        realFinalists.forEach(team=>{
+          if(predFinalists.includes(team)){
+            roundItems.push({
+              label:`Finalista: ${team}`,
+              pred:`Predicho como finalista`,
+              pts:7, det:'Finalista acertado +7'
+            });
+          }
+        });
+      }
+    }
+
+    if(roundItems.length){
+      const div=document.createElement('div');div.className='kor';
+      const t=document.createElement('div');t.className='kort';t.style.color='var(--d)';
+      t.textContent=RNAMES[r];
+      div.appendChild(t);
+      roundItems.forEach(it=>{
+        const c=document.createElement('div');c.className='kom';
+        c.innerHTML=`<div class="komh"><span>${it.label}</span></div>
+          <div class="komh" style="padding-top:0;"><span>${it.pred}</span></div>
+          <div class="ptsr" style="padding-top:6px;">
+            <span class="pb ${it.pts>0?'hit':'miss'}">${it.pts>0?'+'+it.pts+' pts':'0 pts'}</span>
+            <span class="pb pend" style="font-size:9px">${it.det}</span>
+          </div>`;
+        div.appendChild(c);
+      });
+      wrap.appendChild(div);
+    }
+  });
+
+  if(!wrap.innerHTML){
+    wrap.innerHTML='<div style="color:var(--t2);font-size:12px;text-align:center;padding:20px;">Aún no hay resultados reales ingresados.</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════════
 // NAVEGACIÓN
 // ══════════════════════════════════════════════════════
 function showPg(id,btn){
@@ -1041,6 +1164,7 @@ function showPg(id,btn){
   if(id==='predicciones')buildPredKO();
   if(id==='realko')buildRealKO();
   if(id==='resumen')calcResumen();
+  if(id==='detalle')buildDetalle();
   if(id==='detalle')renderDetalleGrupos();
 }
 
