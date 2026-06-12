@@ -339,7 +339,11 @@ let pred = {}, real = {};   // grupos
 let realKO = {};             // resultados reales KO: realKO[r][mi]={ht,at,h,a,pen}
 
 // Resultados reales grupos quemados (se irán agregando)
-const REAL_FIXED = {};
+const REAL_FIXED = {
+  'A_0': {h:2, a:0}, // México 2-0 Sudáfrica
+  'A_1': {h:2, a:1}, // Corea del Sur 2-1 Chequia (Rep. Checa)
+  'B_0': {h:1, a:1}, // Canadá 1-1 Bosnia-Herzegovina
+};
 
 // ══════════════════════════════════════════════════════
 // GUARDAR / CARGAR
@@ -491,8 +495,25 @@ function onRealGrp(gid,mi) {
   if(!real[gid])real[gid]={};
   if(h!==''&&a!=='')real[gid][mi]={h:parseInt(h),a:parseInt(a)};
   else delete real[gid][mi];
-  const old=document.getElementById('mc_'+gid+'_'+mi);
-  if(old)old.parentNode.replaceChild(makeMatchCard(gid,mi),old);
+
+  // Update only the points badge, don't rebuild the card (avoids losing focus on mobile)
+  const m=GR[gid].m[mi];
+  const p=pred[gid][mi]||{h:m.ph,a:m.pa};
+  const rk=gid+'_'+mi;
+  const rv=REAL_FIXED[rk]||real[gid]?.[mi];
+  const ptsEl=document.querySelector('#mc_'+gid+'_'+mi+' .ptsr');
+  if(ptsEl){
+    if(rv){
+      let pts=0;
+      if(resStr(p.h,p.a)===resStr(rv.h,rv.a))pts+=1;
+      if(p.h===rv.h&&p.a===rv.a)pts+=3;
+      ptsEl.innerHTML=(pts>0?`<span class="pb hit">+${pts} pts</span>`:'<span class="pb miss">0 pts</span>')
+        +(p.h===rv.h&&p.a===rv.a?'<span class="pb hit">⭐ Exacto</span>':'')
+        +(resStr(p.h,p.a)===resStr(rv.h,rv.a)?'<span class="pb hit">✓ Result.</span>':'<span class="pb miss">✗ Result.</span>');
+    } else {
+      ptsEl.innerHTML='<span class="pb pend">Pendiente</span>';
+    }
+  }
   renderStand(gid); renderThirds(); calcResumen(); autoSave();
 }
 
@@ -653,23 +674,55 @@ function buildRealKO() {
         </div>
         <div class="pts-compare">${ptH}<span class="pb pend" style="font-size:9px">Tu pred: ${predW||'?'}</span></div>`;
 
-      // Events
-      const updateCard=()=>{
+      // Events — score inputs update state + UI in place (no rebuild, avoids losing focus)
+      const updateScore=()=>{
         const ht=document.getElementById('rnt_'+r+'_'+mi)?.value||defHt;
         const at=document.getElementById('rna_'+r+'_'+mi)?.value||defAt;
         const hv=document.getElementById('rsh_'+r+'_'+mi)?.value;
         const av=document.getElementById('rsa_'+r+'_'+mi)?.value;
         if(!realKO[r])realKO[r]={};
-        realKO[r][mi]={ht,at,h:hv,a:av,pen:null};
-        const t2=!isNaN(parseInt(hv))&&!isNaN(parseInt(av))&&parseInt(hv)===parseInt(av);
-        document.getElementById('rpen_'+r+'_'+mi)?.classList.toggle('on',t2);
+        const prevPen=realKO[r][mi]?.pen;
+        const h2=parseInt(hv), a2=parseInt(av);
+        const tied=!isNaN(h2)&&!isNaN(a2)&&h2===a2;
+        realKO[r][mi]={ht,at,h:hv,a:av,pen:tied?prevPen:null};
+
+        const penEl=document.getElementById('rpen_'+r+'_'+mi);
+        if(penEl)penEl.classList.toggle('on',tied);
+
+        // Update winner highlight + points without full rebuild
+        const rW=(!isNaN(h2)&&!isNaN(a2))?(h2>a2?ht:h2<a2?at:realKO[r][mi].pen):null;
+        const lTeam=card.querySelector('.real-team.l');
+        const rTeam=card.querySelector('.real-team.r');
+        if(lTeam){lTeam.className='real-team l'+(rW===ht?' wn':rW?' ls':'');}
+        if(rTeam){rTeam.className='real-team r'+(rW===at?' wn':rW?' ls':'');}
+
+        const predW=pm.ph>pm.pa?pm.ht:pm.ph<pm.pa?pm.at:pm.pen;
+        const ptEl=card.querySelector('.pts-compare');
+        if(ptEl){
+          let ptH='<span class="pb pend">Pendiente</span>';
+          if(rW){ptH=rW===predW?`<span class="pb hit">+${RPTS[r]} pts ✓</span>`:'<span class="pb miss">0 pts ✗</span>';}
+          ptEl.innerHTML=ptH+`<span class="pb pend" style="font-size:9px">Tu pred: ${predW||'?'}</span>`;
+        }
+
+        calcResumen(); autoSave();
+        // Rebuild only if this affects propagation to next rounds (real winner changed)
+        if(r<5) buildRealKO();
+      };
+
+      // Name inputs: only rebuild on change (when user finishes typing)
+      const updateNames=()=>{
+        const ht=document.getElementById('rnt_'+r+'_'+mi)?.value||defHt;
+        const at=document.getElementById('rna_'+r+'_'+mi)?.value||defAt;
+        if(!realKO[r])realKO[r]={};
+        const s=realKO[r][mi]||{};
+        realKO[r][mi]={...s,ht,at};
         buildRealKO(); calcResumen(); autoSave();
       };
 
-      card.querySelector('#rnt_'+r+'_'+mi).addEventListener('change',updateCard);
-      card.querySelector('#rna_'+r+'_'+mi).addEventListener('change',updateCard);
-      card.querySelector('#rsh_'+r+'_'+mi).addEventListener('input',updateCard);
-      card.querySelector('#rsa_'+r+'_'+mi).addEventListener('input',updateCard);
+      card.querySelector('#rnt_'+r+'_'+mi).addEventListener('change',updateNames);
+      card.querySelector('#rna_'+r+'_'+mi).addEventListener('change',updateNames);
+      card.querySelector('#rsh_'+r+'_'+mi).addEventListener('input',updateScore);
+      card.querySelector('#rsa_'+r+'_'+mi).addEventListener('input',updateScore);
       card.querySelector('#rpb_h_'+r+'_'+mi).addEventListener('click',()=>{
         if(!realKO[r]?.[mi])return;
         realKO[r][mi].pen=defHt;
