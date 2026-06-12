@@ -473,11 +473,13 @@ function makeMatchCard(gid,mi) {
   let ptsH='<span class="pb pend">Pendiente</span>';
   if(rv){
     let pts=0;
-    if(resStr(p.h,p.a)===resStr(rv.h,rv.a))pts+=1;
-    if(p.h===rv.h&&p.a===rv.a)pts+=3;
+    const exact = p.h===rv.h&&p.a===rv.a;
+    const resOk = resStr(p.h,p.a)===resStr(rv.h,rv.a);
+    if(exact) pts=3;
+    else if(resOk) pts=1;
     ptsH=(pts>0?`<span class="pb hit">+${pts} pts</span>`:'<span class="pb miss">0 pts</span>')
-      +(p.h===rv.h&&p.a===rv.a?'<span class="pb hit">⭐ Exacto</span>':'')
-      +(resStr(p.h,p.a)===resStr(rv.h,rv.a)?'<span class="pb hit">✓ Result.</span>':'<span class="pb miss">✗ Result.</span>');
+      +(exact?'<span class="pb hit">⭐ Exacto</span>':'')
+      +(resOk?'<span class="pb hit">✓ Result.</span>':'<span class="pb miss">✗ Result.</span>');
   }
   const div=document.createElement('div');div.className='mc';div.id='mc_'+gid+'_'+mi;
   div.innerHTML=`
@@ -520,12 +522,12 @@ function onRealGrp(gid,mi) {
   const ptsEl=document.querySelector('#mc_'+gid+'_'+mi+' .ptsr');
   if(ptsEl){
     if(rv){
-      let pts=0;
-      if(resStr(p.h,p.a)===resStr(rv.h,rv.a))pts+=1;
-      if(p.h===rv.h&&p.a===rv.a)pts+=3;
+      const exact = p.h===rv.h&&p.a===rv.a;
+      const resOk = resStr(p.h,p.a)===resStr(rv.h,rv.a);
+      let pts = exact ? 3 : resOk ? 1 : 0;
       ptsEl.innerHTML=(pts>0?`<span class="pb hit">+${pts} pts</span>`:'<span class="pb miss">0 pts</span>')
-        +(p.h===rv.h&&p.a===rv.a?'<span class="pb hit">⭐ Exacto</span>':'')
-        +(resStr(p.h,p.a)===resStr(rv.h,rv.a)?'<span class="pb hit">✓ Result.</span>':'<span class="pb miss">✗ Result.</span>');
+        +(exact?'<span class="pb hit">⭐ Exacto</span>':'')
+        +(resOk?'<span class="pb hit">✓ Result.</span>':'<span class="pb miss">✗ Result.</span>');
     } else {
       ptsEl.innerHTML='<span class="pb pend">Pendiente</span>';
     }
@@ -770,16 +772,18 @@ function calcResumen() {
       const rk=gid+'_'+mi;
       const rv=REAL_FIXED[rk]||real[gid]?.[mi]; if(!rv)return;
       const p=pred[gid][mi];
-      // Regla 1: +1 acierto resultado
-      if(resStr(p.h,p.a)===resStr(rv.h,rv.a)){total+=1;res_+=1;}
-      // Regla 2: +3 acierto marcador exacto
-      if(p.h===rv.h&&p.a===rv.a){
+      // Reglas 1 y 2: marcador exacto = 3 pts (no se suman); solo resultado = 1 pt
+      const exact = p.h===rv.h&&p.a===rv.a;
+      const resOk = resStr(p.h,p.a)===resStr(rv.h,rv.a);
+      if(exact){
         total+=3; mark+=1;
         items.push({l:`⭐ Marcador exacto: ${m.h} ${p.h}-${p.a} ${m.a}`,p:'+3'});
+      } else if(resOk){
+        total+=1; res_+=1;
+        items.push({l:`✓ Resultado correcto: ${m.h} vs ${m.a}`,p:'+1'});
       }
     });
   });
-  if(res_>0) items.unshift({l:`✓ ${res_} resultado(s) correcto(s)`,p:`+${res_}`});
 
   // ── FASE ELIMINACIÓN ───────────────────────────────
   // Reglas 3-7: clasificados por ronda
@@ -1049,9 +1053,11 @@ function buildDetalle() {
       const rv=REAL_FIXED[rk]||real[gid]?.[mi];
       if(!rv)return;
       const p=pred[gid][mi];
+      const exact = p.h===rv.h&&p.a===rv.a;
+      const resOk = resStr(p.h,p.a)===resStr(rv.h,rv.a);
       let pts=0, det=[];
-      if(resStr(p.h,p.a)===resStr(rv.h,rv.a)){pts+=1;det.push('Resultado +1');}
-      if(p.h===rv.h&&p.a===rv.a){pts+=3;det.push('Marcador exacto +3');}
+      if(exact){pts=3;det.push('Marcador exacto +3');}
+      else if(resOk){pts=1;det.push('Resultado +1');}
       groupItems.push({
         label:`${m.h} ${rv.h}-${rv.a} ${m.a}`,
         pred:`Predicción: ${p.h}-${p.a}`,
