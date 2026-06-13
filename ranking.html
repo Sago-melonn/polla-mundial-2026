@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Polla La Chucha Mundial 2026 — Ranking</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--v:#00a86b;--vd:#007a4d;--d:#f4a015;--r:#e63946;--bg:#0d1117;--b2:#161b22;--b3:#21262d;--br:rgba(255,255,255,0.08);--tx:#e6edf3;--t2:#8b949e;--rd:10px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+.hdr{background:linear-gradient(135deg,#0d3d26,#0d1117);padding:14px 14px 10px;border-bottom:1px solid var(--vd);}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--v);line-height:1;}
+.hdr h2{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--d);margin-top:1px;}
+.hdr p{font-size:10px;color:var(--t2);margin-top:2px;}
+.sbtn{background:var(--v);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;flex-shrink:0;}
+.sbtn:active{background:var(--vd);}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--v);color:#fff;font-size:12px;font-weight:500;padding:9px 18px;border-radius:18px;z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;}
+.toast.on{opacity:1;}
+nav{display:flex;overflow-x:auto;background:var(--b2);border-bottom:1px solid var(--br);scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+nav button{flex-shrink:0;padding:10px 11px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
+nav button.on{color:var(--v);border-bottom-color:var(--v);}
+.pg{display:none;padding:12px;}
+.pg.on{display:block;}
+.stitle{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--v);margin-bottom:8px;}
+.ibox{background:rgba(244,160,21,0.08);border:1px solid rgba(244,160,21,0.2);border-radius:var(--rd);padding:8px 10px;font-size:11px;color:var(--d);margin-bottom:10px;line-height:1.5;}
+
+/* PLAYERS MANAGEMENT */
+.player-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+.player-row input{flex:1;padding:8px 10px;border-radius:7px;border:1px solid var(--br);background:var(--b3);color:var(--tx);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;}
+.player-row input:focus{border-color:var(--v);}
+.player-row .pnum{width:22px;font-size:11px;color:var(--t2);text-align:center;flex-shrink:0;}
+.del-btn{background:var(--r);color:#fff;border:none;border-radius:7px;width:32px;height:32px;font-size:14px;cursor:pointer;flex-shrink:0;}
+.add-btn{background:var(--v);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;width:100%;cursor:pointer;margin-top:8px;}
+
+/* TABLES */
+.tw{overflow-x:auto;border-radius:var(--rd);border:1px solid var(--br);margin-bottom:12px;}
+table.grid{border-collapse:collapse;font-size:11px;white-space:nowrap;}
+table.grid th, table.grid td{border-bottom:1px solid var(--br);border-right:1px solid var(--br);padding:5px 4px;text-align:center;}
+table.grid th{background:var(--b3);color:var(--t2);font-weight:600;position:sticky;top:0;z-index:2;}
+table.grid td:first-child, table.grid th:first-child{position:sticky;left:0;background:var(--b2);z-index:3;text-align:left;padding-left:8px;min-width:160px;font-weight:500;font-size:10px;color:var(--tx);}
+table.grid th:first-child{background:var(--b3);z-index:4;}
+table.grid th.player-col{min-width:54px;color:var(--v);}
+table.grid input.pts-cell{width:42px;height:26px;border-radius:5px;border:1px solid var(--br);background:var(--b3);color:var(--tx);font-size:12px;font-weight:600;text-align:center;font-family:'DM Sans',sans-serif;-moz-appearance:textfield;outline:none;}
+table.grid input.pts-cell::-webkit-inner-spin-button, table.grid input.pts-cell::-webkit-outer-spin-button{-webkit-appearance:none;}
+table.grid input.pts-cell:focus{border-color:var(--v);}
+table.grid tr.group-header td{background:var(--b3);color:var(--d);font-weight:600;text-align:left;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;font-size:12px;position:static;}
+table.grid tr.total-row td{background:rgba(0,168,107,0.08);font-weight:700;color:var(--v);position:sticky;bottom:0;}
+table.grid tr.extra-row td:first-child{font-size:10px;}
+
+/* RANKING */
+.rank-card{display:flex;align-items:center;gap:10px;background:var(--b2);border:1px solid var(--br);border-radius:var(--rd);padding:12px;margin-bottom:8px;}
+.rank-pos{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--t2);width:36px;text-align:center;flex-shrink:0;}
+.rank-pos.gold{color:#FFD700;}
+.rank-pos.silver{color:#C0C0C0;}
+.rank-pos.bronze{color:#CD7F32;}
+.rank-name{flex:1;font-size:14px;font-weight:600;}
+.rank-pts{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--v);}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <h1>⚽ Polla La Chucha</h1>
+      <h2>Ranking · Mundial 2026</h2>
+      <p>Registro de puntos por jugador</p>
+    </div>
+    <button class="sbtn" onclick="guardar()">💾 Guardar</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<nav>
+  <button class="on" onclick="showPg('jugadores',this)">Jugadores</button>
+  <button onclick="showPg('grupos',this)">Fase Grupos</button>
+  <button onclick="showPg('eliminacion',this)">Eliminación</button>
+  <button onclick="showPg('extras',this)">Puntos Extra</button>
+  <button onclick="showPg('ranking',this)">🏆 Ranking</button>
+</nav>
+
+<!-- JUGADORES -->
+<div id="jugadores" class="pg on">
+  <div class="ibox">Agrega hasta 20 jugadores de la polla. Sus nombres aparecerán como columnas en las tablas de puntos.</div>
+  <div id="playerList"></div>
+  <button class="add-btn" onclick="addPlayer()">+ Agregar jugador</button>
+</div>
+
+<!-- FASE GRUPOS -->
+<div id="grupos" class="pg">
+  <div class="ibox">Ingresa los puntos obtenidos por cada jugador en cada partido (según las reglas: +1 resultado, +3 marcador exacto).</div>
+  <div class="tw"><table class="grid" id="tblGrupos"></table></div>
+</div>
+
+<!-- ELIMINACIÓN -->
+<div id="eliminacion" class="pg">
+  <div class="ibox">Puntos obtenidos por cada jugador en cada partido de la fase de eliminación (16avos +3, octavos +4, cuartos +5, semis +6, etc.).</div>
+  <div class="tw"><table class="grid" id="tblElim"></table></div>
+</div>
+
+<!-- PUNTOS EXTRA -->
+<div id="extras" class="pg">
+  <div class="ibox">Puntos adicionales por aciertos de clasificación y posiciones finales, según las reglas del apoyo.</div>
+  <div class="tw"><table class="grid" id="tblExtras"></table></div>
+</div>
+
+<!-- RANKING -->
+<div id="ranking" class="pg">
+  <div class="stitle">🏆 Ranking General</div>
+  <div id="rankList"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATOS DE PARTIDOS (mismos que la app principal)
+// ══════════════════════════════════════════════════════
+const GR = {
+  A:{teams:['México','Sudáfrica','Corea del Sur','Chequia'],matches:[
+    ['México','Sudáfrica'],['Corea del Sur','Chequia'],['Chequia','Sudáfrica'],
+    ['México','Corea del Sur'],['México','Chequia'],['Corea del Sur','Sudáfrica']]},
+  B:{teams:['Canadá','Bosnia-Herzegovina','Catar','Suiza'],matches:[
+    ['Canadá','Bosnia-Herzegovina'],['Catar','Suiza'],['Suiza','Bosnia-Herzegovina'],
+    ['Canadá','Catar'],['Suiza','Canadá'],['Bosnia-Herzegovina','Catar']]},
+  C:{teams:['Brasil','Marruecos','Haití','Escocia'],matches:[
+    ['Brasil','Marruecos'],['Haití','Escocia'],['Escocia','Marruecos'],
+    ['Brasil','Haití'],['Brasil','Escocia'],['Marruecos','Haití']]},
+  D:{teams:['EE.UU.','Paraguay','Turquía','Australia'],matches:[
+    ['EE.UU.','Paraguay'],['Australia','Turquía'],['EE.UU.','Australia'],
+    ['Turquía','Paraguay'],['EE.UU.','Turquía'],['Paraguay','Australia']]},
+  E:{teams:['Alemania','Curazao','Costa de Marfil','Ecuador'],matches:[
+    ['Alemania','Curazao'],['Costa de Marfil','Ecuador'],['Alemania','Costa de Marfil'],
+    ['Ecuador','Curazao'],['Ecuador','Alemania'],['Curazao','Costa de Marfil']]},
+  F:{teams:['Holanda','Japón','Suecia','Túnez'],matches:[
+    ['Holanda','Japón'],['Túnez','Suecia'],['Holanda','Suecia'],
+    ['Túnez','Japón'],['Túnez','Holanda'],['Japón','Suecia']]},
+  G:{teams:['Bélgica','Egipto','Irán','Nueva Zelanda'],matches:[
+    ['Bélgica','Egipto'],['Irán','Nueva Zelanda'],['Bélgica','Irán'],
+    ['Nueva Zelanda','Egipto'],['Nueva Zelanda','Bélgica'],['Egipto','Irán']]},
+  H:{teams:['España','Cabo Verde','Uruguay','Arabia Saudita'],matches:[
+    ['España','Cabo Verde'],['Arabia Saudita','Uruguay'],['España','Arabia Saudita'],
+    ['Uruguay','Cabo Verde'],['Uruguay','España'],['Cabo Verde','Arabia Saudita']]},
+  I:{teams:['Francia','Senegal','Irak','Noruega'],matches:[
+    ['Francia','Senegal'],['Irak','Noruega'],['Francia','Irak'],
+    ['Noruega','Senegal'],['Noruega','Francia'],['Senegal','Irak']]},
+  J:{teams:['Argentina','Argelia','Austria','Jordania'],matches:[
+    ['Argentina','Argelia'],['Austria','Jordania'],['Argentina','Austria'],
+    ['Jordania','Argelia'],['Argentina','Jordania'],['Argelia','Austria']]},
+  K:{teams:['Portugal','Congo DR','Uzbekistán','Colombia'],matches:[
+    ['Portugal','Congo DR'],['Uzbekistán','Colombia'],['Portugal','Uzbekistán'],
+    ['Colombia','Congo DR'],['Colombia','Portugal'],['Congo DR','Uzbekistán']]},
+  L:{teams:['Inglaterra','Croacia','Ghana','Panamá'],matches:[
+    ['Inglaterra','Croacia'],['Ghana','Panamá'],['Inglaterra','Ghana'],
+    ['Panamá','Croacia'],['Panamá','Inglaterra'],['Croacia','Ghana']]}
+};
+
+const KO = {
+  '16avos':['P73','P74','P75','P76','P77','P78','P79','P80','P81','P82','P83','P84','P85','P86','P87','P88'],
+  'Octavos':['P89','P90','P91','P92','P93','P94','P95','P96'],
+  'Cuartos':['P97','P98','P99','P100'],
+  'Semis':['P101','P102'],
+  'Final':['P104'],
+  '3er Puesto':['P103']
+};
+
+// Reglas de puntos extra (clasificación / posiciones)
+const EXTRA_RULES = [
+  {key:'r16', label:'Equipos clasificados a 16avos', pts:3},
+  {key:'r8',  label:'Equipos clasificados a octavos', pts:4},
+  {key:'r4',  label:'Equipos clasificados a cuartos', pts:5},
+  {key:'r2',  label:'Equipos clasificados a semifinal', pts:6},
+  {key:'fin', label:'Equipos clasificados a la final', pts:7},
+  {key:'p4',  label:'Acierto cuarto puesto', pts:7},
+  {key:'p3',  label:'Acierto tercer puesto', pts:10},
+  {key:'p2',  label:'Acierto subcampeón', pts:15},
+  {key:'p1',  label:'Acierto campeón', pts:20},
+];
+
+// ══════════════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════════════
+const SK = 'polla_chucha_ranking_v1';
+let players = [];          // ['Nombre1','Nombre2',...]
+let scores = {};           // scores[matchKey][playerIdx] = pts
+let extras = {};           // extras[ruleKey][playerIdx] = count of aciertos (multiplied by pts)
+
+function guardar(){
+  try{
+    localStorage.setItem(SK, JSON.stringify({players, scores, extras}));
+    toast('✓ Guardado — Polla La Chucha');
+  }catch(e){toast('⚠ No se pudo guardar');}
+}
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+function autoSave(){
+  try{localStorage.setItem(SK, JSON.stringify({players, scores, extras}));}catch(e){}
+}
+function loadLS(){
+  try{
+    const raw=localStorage.getItem(SK);
+    if(!raw)return;
+    const s=JSON.parse(raw);
+    if(s.players)players=s.players;
+    if(s.scores)scores=s.scores;
+    if(s.extras)extras=s.extras;
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════════════════
+// JUGADORES
+// ══════════════════════════════════════════════════════
+function buildPlayers(){
+  const wrap=document.getElementById('playerList');
+  wrap.innerHTML='';
+  if(players.length===0){
+    for(let i=1;i<=4;i++)players.push('Jugador '+i);
+  }
+  players.forEach((name,i)=>{
+    const row=document.createElement('div');row.className='player-row';
+    row.innerHTML=`<span class="pnum">${i+1}</span>
+      <input type="text" id="pname_${i}" value="${name}" placeholder="Nombre del jugador">
+      <button class="del-btn" onclick="removePlayer(${i})">✕</button>`;
+    wrap.appendChild(row);
+    row.querySelector('#pname_'+i).addEventListener('change',(e)=>{
+      players[i]=e.target.value||('Jugador '+(i+1));
+      autoSave(); buildAllTables();
+    });
+  });
+}
+function addPlayer(){
+  if(players.length>=20){toast('⚠ Máximo 20 jugadores');return;}
+  players.push('Jugador '+(players.length+1));
+  autoSave(); buildPlayers(); buildAllTables();
+}
+function removePlayer(i){
+  players.splice(i,1);
+  // Shift scores/extras indices
+  Object.keys(scores).forEach(mk=>{
+    const newRow={};
+    Object.keys(scores[mk]).forEach(pi=>{
+      const idx=parseInt(pi);
+      if(idx<i)newRow[idx]=scores[mk][pi];
+      else if(idx>i)newRow[idx-1]=scores[mk][pi];
+    });
+    scores[mk]=newRow;
+  });
+  Object.keys(extras).forEach(rk=>{
+    const newRow={};
+    Object.keys(extras[rk]).forEach(pi=>{
+      const idx=parseInt(pi);
+      if(idx<i)newRow[idx]=extras[rk][pi];
+      else if(idx>i)newRow[idx-1]=extras[rk][pi];
+    });
+    extras[rk]=newRow;
+  });
+  autoSave(); buildPlayers(); buildAllTables();
+}
+
+// ══════════════════════════════════════════════════════
+// TABLAS DE PUNTOS POR PARTIDO
+// ══════════════════════════════════════════════════════
+function buildScoreTable(tableId, sections, prefix){
+  const tbl=document.getElementById(tableId);
+  tbl.innerHTML='';
+
+  // Header
+  const thead=document.createElement('thead');
+  const htr=document.createElement('tr');
+  htr.innerHTML='<th>Partido</th>'+players.map((p,i)=>`<th class="player-col">${p}</th>`).join('');
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+
+  sections.forEach(sec=>{
+    const ghr=document.createElement('tr');ghr.className='group-header';
+    ghr.innerHTML=`<td colspan="${players.length+1}">${sec.title}</td>`;
+    tbody.appendChild(ghr);
+
+    sec.items.forEach(item=>{
+      const key=prefix+'_'+item.key;
+      const tr=document.createElement('tr');
+      let cells=`<td>${item.label}</td>`;
+      players.forEach((p,pi)=>{
+        const val=scores[key]?.[pi];
+        cells+=`<td><input class="pts-cell" type="number" id="sc_${key}_${pi}" value="${val!==undefined?val:''}" placeholder="0" inputmode="numeric"></td>`;
+      });
+      tr.innerHTML=cells;
+      tbody.appendChild(tr);
+    });
+  });
+
+  // Total row
+  const totalTr=document.createElement('tr');totalTr.className='total-row';
+  let totalCells='<td>TOTAL</td>';
+  players.forEach((p,pi)=>{
+    totalCells+=`<td id="tot_${prefix}_${pi}">0</td>`;
+  });
+  totalTr.innerHTML=totalCells;
+  tbody.appendChild(totalTr);
+
+  tbl.appendChild(tbody);
+
+  // Attach listeners
+  sections.forEach(sec=>{
+    sec.items.forEach(item=>{
+      const key=prefix+'_'+item.key;
+      players.forEach((p,pi)=>{
+        const el=document.getElementById('sc_'+key+'_'+pi);
+        if(el)el.addEventListener('input',()=>{
+          const v=el.value;
+          if(!scores[key])scores[key]={};
+          if(v==='')delete scores[key][pi];
+          else scores[key][pi]=parseFloat(v);
+          updateTotals(prefix, sections);
+          updateRanking();
+          autoSave();
+        });
+      });
+    });
+  });
+
+  updateTotals(prefix, sections);
+}
+
+function updateTotals(prefix, sections){
+  players.forEach((p,pi)=>{
+    let sum=0;
+    sections.forEach(sec=>sec.items.forEach(item=>{
+      const key=prefix+'_'+item.key;
+      const v=scores[key]?.[pi];
+      if(v!==undefined)sum+=v;
+    }));
+    const el=document.getElementById('tot_'+prefix+'_'+pi);
+    if(el)el.textContent=sum;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// FASE GRUPOS — secciones por grupo
+// ══════════════════════════════════════════════════════
+function buildGruposTable(){
+  const sections=Object.keys(GR).map(gid=>({
+    title:'Grupo '+gid,
+    items: GR[gid].matches.map((m,mi)=>({
+      key: gid+'_'+mi,
+      label: m[0]+' vs '+m[1]
+    }))
+  }));
+  buildScoreTable('tblGrupos', sections, 'g');
+}
+
+// ══════════════════════════════════════════════════════
+// ELIMINACIÓN — secciones por ronda
+// ══════════════════════════════════════════════════════
+function buildElimTable(){
+  const sections=Object.keys(KO).map(roundName=>({
+    title: roundName,
+    items: KO[roundName].map(p=>({key:p, label:p}))
+  }));
+  buildScoreTable('tblElim', sections, 'k');
+}
+
+// ══════════════════════════════════════════════════════
+// PUNTOS EXTRA — clasificación y posiciones
+// ══════════════════════════════════════════════════════
+function buildExtrasTable(){
+  const tbl=document.getElementById('tblExtras');
+  tbl.innerHTML='';
+
+  const thead=document.createElement('thead');
+  const htr=document.createElement('tr');
+  htr.innerHTML='<th>Categoría</th>'+players.map(p=>`<th class="player-col">${p}</th>`).join('');
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+  EXTRA_RULES.forEach(rule=>{
+    const tr=document.createElement('tr');tr.className='extra-row';
+    let cells=`<td>${rule.label} <span style="color:var(--v);font-size:9px">(${rule.pts} pts c/u)</span></td>`;
+    players.forEach((p,pi)=>{
+      const val=extras[rule.key]?.[pi];
+      cells+=`<td><input class="pts-cell" type="number" id="ex_${rule.key}_${pi}" value="${val!==undefined?val:''}" placeholder="0" inputmode="numeric" title="Cantidad de aciertos"></td>`;
+    });
+    tr.innerHTML=cells;
+    tbody.appendChild(tr);
+  });
+
+  // Subtotal row (extras total)
+  const totalTr=document.createElement('tr');totalTr.className='total-row';
+  let totalCells='<td>TOTAL EXTRAS</td>';
+  players.forEach((p,pi)=>{
+    totalCells+=`<td id="tot_extras_${pi}">0</td>`;
+  });
+  totalTr.innerHTML=totalCells;
+  tbody.appendChild(totalTr);
+
+  tbl.appendChild(tbody);
+
+  // Listeners
+  EXTRA_RULES.forEach(rule=>{
+    players.forEach((p,pi)=>{
+      const el=document.getElementById('ex_'+rule.key+'_'+pi);
+      if(el)el.addEventListener('input',()=>{
+        const v=el.value;
+        if(!extras[rule.key])extras[rule.key]={};
+        if(v==='')delete extras[rule.key][pi];
+        else extras[rule.key][pi]=parseFloat(v);
+        updateExtrasTotal();
+        updateRanking();
+        autoSave();
+      });
+    });
+  });
+
+  updateExtrasTotal();
+}
+
+function updateExtrasTotal(){
+  players.forEach((p,pi)=>{
+    let sum=0;
+    EXTRA_RULES.forEach(rule=>{
+      const count=extras[rule.key]?.[pi]||0;
+      sum+=count*rule.pts;
+    });
+    const el=document.getElementById('tot_extras_'+pi);
+    if(el)el.textContent=sum;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// RANKING
+// ══════════════════════════════════════════════════════
+function calcPlayerTotal(pi){
+  let sum=0;
+  // Grupos
+  Object.keys(GR).forEach(gid=>{
+    GR[gid].matches.forEach((m,mi)=>{
+      const key='g_'+gid+'_'+mi;
+      const v=scores[key]?.[pi];
+      if(v!==undefined)sum+=v;
+    });
+  });
+  // Eliminación
+  Object.keys(KO).forEach(roundName=>{
+    KO[roundName].forEach(p=>{
+      const key='k_'+p;
+      const v=scores[key]?.[pi];
+      if(v!==undefined)sum+=v;
+    });
+  });
+  // Extras
+  EXTRA_RULES.forEach(rule=>{
+    const count=extras[rule.key]?.[pi]||0;
+    sum+=count*rule.pts;
+  });
+  return sum;
+}
+
+function updateRanking(){
+  const wrap=document.getElementById('rankList');
+  wrap.innerHTML='';
+  const ranked=players.map((name,pi)=>({name, pts:calcPlayerTotal(pi)}))
+    .sort((a,b)=>b.pts-a.pts);
+
+  ranked.forEach((r,i)=>{
+    const posClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'°';
+    const card=document.createElement('div');card.className='rank-card';
+    card.innerHTML=`<div class="rank-pos ${posClass}">${medal}</div>
+      <div class="rank-name">${r.name}</div>
+      <div class="rank-pts">${r.pts}</div>`;
+    wrap.appendChild(card);
+  });
+}
+
+function buildAllTables(){
+  buildGruposTable();
+  buildElimTable();
+  buildExtrasTable();
+  updateRanking();
+}
+
+// ══════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════════════
+function showPg(id,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='ranking')updateRanking();
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+loadLS();
+buildPlayers();
+buildAllTables();
+</script>
+</body>
+</html>
