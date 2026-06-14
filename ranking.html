@@ -63,6 +63,8 @@ table.grid tr.extra-row td:first-child{font-size:10px;}
 .rank-name{flex:1;font-size:14px;font-weight:600;}
 .rank-pts{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--v);}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 <div class="hdr">
@@ -72,7 +74,10 @@ table.grid tr.extra-row td:first-child{font-size:10px;}
       <h2>Ranking · Mundial 2026</h2>
       <p>Registro de puntos por jugador</p>
     </div>
-    <button class="sbtn" onclick="guardar()">💾 Guardar</button>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button class="sbtn" onclick="guardar()">💾 Guardar</button>
+      <button class="sbtn" style="background:var(--d);" onclick="exportarPDF()">📄 Exportar PDF</button>
+    </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -486,6 +491,182 @@ function buildAllTables(){
   buildElimTable();
   buildExtrasTable();
   updateRanking();
+}
+
+// ══════════════════════════════════════════════════════
+// EXPORTAR PDF — Reporte completo (solo lectura de datos, no modifica localStorage)
+// ══════════════════════════════════════════════════════
+function exportarPDF(){
+  if(typeof window.jspdf === 'undefined'){
+    toast('⚠ Cargando librería PDF, intenta de nuevo en unos segundos');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'letter'});
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 36;
+  const today = new Date().toLocaleDateString('es-CO', {year:'numeric',month:'long',day:'numeric'});
+
+  // ── Portada / Encabezado ──────────────────────────
+  doc.setFillColor(13,61,38);
+  doc.rect(0,0,pageW,90,'F');
+  doc.setTextColor(0,168,107);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(22);
+  doc.text('Polla La Chucha — Mundial 2026', margin, 38);
+  doc.setTextColor(244,160,21);
+  doc.setFontSize(11);
+  doc.text('Reporte de puntos por jugador', margin, 58);
+  doc.setTextColor(180,180,180);
+  doc.setFontSize(9);
+  doc.text('Generado: '+today, margin, 75);
+
+  let y = 115;
+
+  // ── Ranking general ───────────────────────────────
+  doc.setTextColor(20,20,20);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('Ranking General', margin, y);
+  y += 8;
+
+  // Build totals
+  const rankedData = players.map((name,pi)=>{
+    let gTotal=0, kTotal=0, eTotal=0;
+    Object.keys(GR).forEach(gid=>{
+      GR[gid].matches.forEach((m,mi)=>{
+        const v=scores['g_'+gid+'_'+mi]?.[pi];
+        if(v!==undefined)gTotal+=v;
+      });
+    });
+    Object.keys(KO).forEach(roundName=>{
+      KO[roundName].forEach(p=>{
+        const v=scores['k_'+p]?.[pi];
+        if(v!==undefined)kTotal+=v;
+      });
+    });
+    EXTRA_RULES.forEach(rule=>{
+      const count=extras[rule.key]?.[pi]||0;
+      eTotal+=count*rule.pts;
+    });
+    return {name, pi, gTotal, kTotal, eTotal, total: gTotal+kTotal+eTotal};
+  }).sort((a,b)=>b.total-a.total);
+
+  doc.autoTable({
+    startY: y,
+    head: [['#','Jugador','Fase Grupos','Eliminación','Extras','TOTAL']],
+    body: rankedData.map((r,i)=>[
+      i+1, r.name, r.gTotal, r.kTotal, r.eTotal, r.total
+    ]),
+    theme: 'striped',
+    headStyles: {fillColor:[0,168,107], textColor:255, fontStyle:'bold'},
+    bodyStyles: {fontSize:9},
+    columnStyles: {0:{halign:'center',cellWidth:24}, 5:{halign:'center',fontStyle:'bold'}},
+    margin: {left:margin, right:margin},
+  });
+
+  // ── Detalle Fase de Grupos por jugador ────────────
+  doc.addPage();
+  y = 40;
+  doc.setTextColor(20,20,20);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('Detalle Fase de Grupos — por partido', margin, y);
+  y += 10;
+
+  const groupRows = [];
+  Object.keys(GR).forEach(gid=>{
+    GR[gid].matches.forEach((m,mi)=>{
+      const row = ['Grupo '+gid, m[0]+' vs '+m[1]];
+      players.forEach((p,pi)=>{
+        const v=scores['g_'+gid+'_'+mi]?.[pi];
+        row.push(v!==undefined?v:'-');
+      });
+      groupRows.push(row);
+    });
+  });
+
+  doc.autoTable({
+    startY: y,
+    head: [['Grupo','Partido', ...players]],
+    body: groupRows,
+    theme: 'grid',
+    headStyles: {fillColor:[0,168,107], textColor:255, fontStyle:'bold', fontSize:8},
+    bodyStyles: {fontSize:7},
+    columnStyles: {0:{cellWidth:40}, 1:{cellWidth:90}},
+    margin: {left:margin, right:margin},
+  });
+
+  // ── Detalle Eliminación por jugador ───────────────
+  doc.addPage();
+  y = 40;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('Detalle Fase de Eliminación — por partido', margin, y);
+  y += 10;
+
+  const koRows = [];
+  Object.keys(KO).forEach(roundName=>{
+    KO[roundName].forEach(p=>{
+      const row = [roundName, p];
+      players.forEach((pl,pi)=>{
+        const v=scores['k_'+p]?.[pi];
+        row.push(v!==undefined?v:'-');
+      });
+      koRows.push(row);
+    });
+  });
+
+  doc.autoTable({
+    startY: y,
+    head: [['Ronda','Partido', ...players]],
+    body: koRows,
+    theme: 'grid',
+    headStyles: {fillColor:[244,160,21], textColor:255, fontStyle:'bold', fontSize:8},
+    bodyStyles: {fontSize:7},
+    columnStyles: {0:{cellWidth:60}, 1:{cellWidth:50}},
+    margin: {left:margin, right:margin},
+  });
+
+  // ── Puntos Extra por jugador ───────────────────────
+  doc.addPage();
+  y = 40;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('Puntos Extra — Clasificación y Posiciones', margin, y);
+  y += 10;
+
+  const extraRows = EXTRA_RULES.map(rule=>{
+    const row = [rule.label+' ('+rule.pts+' c/u)'];
+    players.forEach((p,pi)=>{
+      const count=extras[rule.key]?.[pi];
+      row.push(count!==undefined?count+' ('+(count*rule.pts)+' pts)':'-');
+    });
+    return row;
+  });
+
+  doc.autoTable({
+    startY: y,
+    head: [['Categoría', ...players]],
+    body: extraRows,
+    theme: 'grid',
+    headStyles: {fillColor:[230,57,70], textColor:255, fontStyle:'bold', fontSize:8},
+    bodyStyles: {fontSize:7},
+    columnStyles: {0:{cellWidth:170}},
+    margin: {left:margin, right:margin},
+  });
+
+  // Footer on all pages
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150,150,150);
+    doc.text('Polla La Chucha · Mundial 2026 · Página '+i+' de '+pageCount, margin, doc.internal.pageSize.getHeight()-20);
+  }
+
+  doc.save('Polla_La_Chucha_Reporte_'+new Date().toISOString().slice(0,10)+'.pdf');
+  toast('✓ PDF generado');
 }
 
 // ══════════════════════════════════════════════════════
