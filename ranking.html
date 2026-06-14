@@ -565,125 +565,146 @@ function exportarPDF(){
     margin: {left:margin, right:margin},
   });
 
-  // ── Detalle Fase de Grupos por jugador ────────────
-  doc.addPage();
-  y = 40;
-  doc.setTextColor(20,20,20);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(14);
-  doc.text('Detalle Fase de Grupos — por partido', margin, y);
-  y += 10;
+  // ── Una página por jugador con sus 3 secciones ────
+  players.forEach((playerName, pi)=>{
+    doc.addPage();
+    y = 40;
 
-  const groupRows = [];
-  Object.keys(GR).forEach(gid=>{
-    GR[gid].matches.forEach((m,mi)=>{
-      const key='g_'+gid+'_'+mi;
-      const hasAny = players.some((p,pi)=>scores[key]?.[pi]!==undefined);
-      if(!hasAny) return; // skip matches not yet scored
-      const row = ['Grupo '+gid, m[0]+' vs '+m[1]];
-      players.forEach((p,pi)=>{
-        const v=scores[key]?.[pi];
-        row.push(v!==undefined?v:'-');
-      });
-      groupRows.push(row);
-    });
-  });
-
-  if(groupRows.length===0){
-    doc.setFont('helvetica','normal');
+    // Player header
+    const rd = rankedData.find(r=>r.pi===pi);
+    const posIdx = rankedData.findIndex(r=>r.pi===pi);
+    doc.setFillColor(0,168,107);
+    doc.rect(0,0,pageW,55,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(16);
+    doc.text(playerName, margin, 28);
     doc.setFontSize(10);
-    doc.setTextColor(140,140,140);
-    doc.text('Aún no hay partidos de fase de grupos con puntos registrados.', margin, y+20);
-  } else {
-    doc.autoTable({
-      startY: y,
-      head: [['Grupo','Partido', ...players]],
-      body: groupRows,
-      theme: 'grid',
-      headStyles: {fillColor:[0,168,107], textColor:255, fontStyle:'bold', fontSize:8},
-      bodyStyles: {fontSize:7},
-      columnStyles: {0:{cellWidth:40}, 1:{cellWidth:90}},
-      margin: {left:margin, right:margin},
-    });
-  }
+    doc.setTextColor(230,255,240);
+    doc.text('Posición #'+(posIdx+1)+' · Total: '+rd.total+' pts', margin, 44);
+    y = 75;
 
-  // ── Detalle Eliminación por jugador ───────────────
-  doc.addPage();
-  y = 40;
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(14);
-  doc.text('Detalle Fase de Eliminación — por partido', margin, y);
-  y += 10;
+    // Sección Fase de Grupos
+    doc.setTextColor(0,168,107);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(12);
+    doc.text('Fase de Grupos', margin, y);
+    y += 6;
 
-  const koRows = [];
-  Object.keys(KO).forEach(roundName=>{
-    KO[roundName].forEach(p=>{
-      const key='k_'+p;
-      const hasAny = players.some((pl,pi)=>scores[key]?.[pi]!==undefined);
-      if(!hasAny) return; // skip matches not yet scored
-      const row = [roundName, p];
-      players.forEach((pl,pi)=>{
+    const groupRows = [];
+    Object.keys(GR).forEach(gid=>{
+      GR[gid].matches.forEach((m,mi)=>{
+        const key='g_'+gid+'_'+mi;
         const v=scores[key]?.[pi];
-        row.push(v!==undefined?v:'-');
+        if(v===undefined) return;
+        groupRows.push(['Grupo '+gid+': '+m[0]+' vs '+m[1], v]);
       });
-      koRows.push(row);
     });
-  });
 
-  if(koRows.length===0){
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(10);
-    doc.setTextColor(140,140,140);
-    doc.text('Aún no hay partidos de eliminación con puntos registrados.', margin, y+20);
-  } else {
-    doc.autoTable({
-      startY: y,
-      head: [['Ronda','Partido', ...players]],
-      body: koRows,
-      theme: 'grid',
-      headStyles: {fillColor:[244,160,21], textColor:255, fontStyle:'bold', fontSize:8},
-      bodyStyles: {fontSize:7},
-      columnStyles: {0:{cellWidth:60}, 1:{cellWidth:50}},
-      margin: {left:margin, right:margin},
+    if(groupRows.length===0){
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(140,140,140);
+      doc.text('Sin partidos registrados aún.', margin, y+14);
+      y += 24;
+    } else {
+      doc.autoTable({
+        startY: y+4,
+        head: [['Partido','Pts']],
+        body: groupRows,
+        foot: [['Subtotal Fase de Grupos', rd.gTotal]],
+        theme: 'grid',
+        headStyles: {fillColor:[0,168,107], textColor:255, fontStyle:'bold', fontSize:9},
+        footStyles: {fillColor:[230,245,238], textColor:[0,100,60], fontStyle:'bold', fontSize:9},
+        bodyStyles: {fontSize:8},
+        columnStyles: {0:{cellWidth:380}, 1:{cellWidth:60,halign:'center'}},
+        margin: {left:margin, right:margin},
+      });
+      y = doc.lastAutoTable.finalY + 16;
+    }
+
+    // Check page break before next section
+    if(y > doc.internal.pageSize.getHeight() - 150){
+      doc.addPage(); y = 40;
+    }
+
+    // Sección Eliminación
+    doc.setTextColor(244,160,21);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(12);
+    doc.text('Fase de Eliminación', margin, y);
+    y += 6;
+
+    const koRows = [];
+    Object.keys(KO).forEach(roundName=>{
+      KO[roundName].forEach(p=>{
+        const key='k_'+p;
+        const v=scores[key]?.[pi];
+        if(v===undefined) return;
+        koRows.push([roundName+' — '+p, v]);
+      });
     });
-  }
 
-  // ── Puntos Extra por jugador ───────────────────────
-  doc.addPage();
-  y = 40;
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(14);
-  doc.text('Puntos Extra — Clasificación y Posiciones', margin, y);
-  y += 10;
+    if(koRows.length===0){
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(140,140,140);
+      doc.text('Sin partidos registrados aún.', margin, y+14);
+      y += 24;
+    } else {
+      doc.autoTable({
+        startY: y+4,
+        head: [['Partido','Pts']],
+        body: koRows,
+        foot: [['Subtotal Eliminación', rd.kTotal]],
+        theme: 'grid',
+        headStyles: {fillColor:[244,160,21], textColor:255, fontStyle:'bold', fontSize:9},
+        footStyles: {fillColor:[253,242,224], textColor:[150,90,0], fontStyle:'bold', fontSize:9},
+        bodyStyles: {fontSize:8},
+        columnStyles: {0:{cellWidth:380}, 1:{cellWidth:60,halign:'center'}},
+        margin: {left:margin, right:margin},
+      });
+      y = doc.lastAutoTable.finalY + 16;
+    }
 
-  const extraRows = EXTRA_RULES.map(rule=>{
-    const hasAny = players.some((p,pi)=>extras[rule.key]?.[pi]!==undefined);
-    if(!hasAny) return null;
-    const row = [rule.label+' ('+rule.pts+' c/u)'];
-    players.forEach((p,pi)=>{
+    // Check page break before next section
+    if(y > doc.internal.pageSize.getHeight() - 150){
+      doc.addPage(); y = 40;
+    }
+
+    // Sección Puntos Extra
+    doc.setTextColor(230,57,70);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(12);
+    doc.text('Puntos Extra', margin, y);
+    y += 6;
+
+    const extraRows = EXTRA_RULES.map(rule=>{
       const count=extras[rule.key]?.[pi];
-      row.push(count!==undefined?count+' ('+(count*rule.pts)+' pts)':'-');
-    });
-    return row;
-  }).filter(Boolean);
+      if(count===undefined) return null;
+      return [rule.label+' ('+rule.pts+' c/u)', count+' = '+(count*rule.pts)+' pts'];
+    }).filter(Boolean);
 
-  if(extraRows.length===0){
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(10);
-    doc.setTextColor(140,140,140);
-    doc.text('Aún no hay puntos extra registrados.', margin, y+20);
-  } else {
-    doc.autoTable({
-      startY: y,
-      head: [['Categoría', ...players]],
-      body: extraRows,
-      theme: 'grid',
-      headStyles: {fillColor:[230,57,70], textColor:255, fontStyle:'bold', fontSize:8},
-      bodyStyles: {fontSize:7},
-      columnStyles: {0:{cellWidth:170}},
-      margin: {left:margin, right:margin},
-    });
-  }
+    if(extraRows.length===0){
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(140,140,140);
+      doc.text('Sin puntos extra registrados aún.', margin, y+14);
+    } else {
+      doc.autoTable({
+        startY: y+4,
+        head: [['Categoría','Aciertos = Puntos']],
+        body: extraRows,
+        foot: [['Subtotal Extras', rd.eTotal+' pts']],
+        theme: 'grid',
+        headStyles: {fillColor:[230,57,70], textColor:255, fontStyle:'bold', fontSize:9},
+        footStyles: {fillColor:[252,230,232], textColor:[160,30,40], fontStyle:'bold', fontSize:9},
+        bodyStyles: {fontSize:8},
+        columnStyles: {0:{cellWidth:380}, 1:{cellWidth:120,halign:'center'}},
+        margin: {left:margin, right:margin},
+      });
+    }
+  });
 
   // Footer on all pages
   const pageCount = doc.internal.getNumberOfPages();
