@@ -577,25 +577,35 @@ function exportarPDF(){
   const groupRows = [];
   Object.keys(GR).forEach(gid=>{
     GR[gid].matches.forEach((m,mi)=>{
+      const key='g_'+gid+'_'+mi;
+      const hasAny = players.some((p,pi)=>scores[key]?.[pi]!==undefined);
+      if(!hasAny) return; // skip matches not yet scored
       const row = ['Grupo '+gid, m[0]+' vs '+m[1]];
       players.forEach((p,pi)=>{
-        const v=scores['g_'+gid+'_'+mi]?.[pi];
+        const v=scores[key]?.[pi];
         row.push(v!==undefined?v:'-');
       });
       groupRows.push(row);
     });
   });
 
-  doc.autoTable({
-    startY: y,
-    head: [['Grupo','Partido', ...players]],
-    body: groupRows,
-    theme: 'grid',
-    headStyles: {fillColor:[0,168,107], textColor:255, fontStyle:'bold', fontSize:8},
-    bodyStyles: {fontSize:7},
-    columnStyles: {0:{cellWidth:40}, 1:{cellWidth:90}},
-    margin: {left:margin, right:margin},
-  });
+  if(groupRows.length===0){
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(140,140,140);
+    doc.text('Aún no hay partidos de fase de grupos con puntos registrados.', margin, y+20);
+  } else {
+    doc.autoTable({
+      startY: y,
+      head: [['Grupo','Partido', ...players]],
+      body: groupRows,
+      theme: 'grid',
+      headStyles: {fillColor:[0,168,107], textColor:255, fontStyle:'bold', fontSize:8},
+      bodyStyles: {fontSize:7},
+      columnStyles: {0:{cellWidth:40}, 1:{cellWidth:90}},
+      margin: {left:margin, right:margin},
+    });
+  }
 
   // ── Detalle Eliminación por jugador ───────────────
   doc.addPage();
@@ -608,25 +618,35 @@ function exportarPDF(){
   const koRows = [];
   Object.keys(KO).forEach(roundName=>{
     KO[roundName].forEach(p=>{
+      const key='k_'+p;
+      const hasAny = players.some((pl,pi)=>scores[key]?.[pi]!==undefined);
+      if(!hasAny) return; // skip matches not yet scored
       const row = [roundName, p];
       players.forEach((pl,pi)=>{
-        const v=scores['k_'+p]?.[pi];
+        const v=scores[key]?.[pi];
         row.push(v!==undefined?v:'-');
       });
       koRows.push(row);
     });
   });
 
-  doc.autoTable({
-    startY: y,
-    head: [['Ronda','Partido', ...players]],
-    body: koRows,
-    theme: 'grid',
-    headStyles: {fillColor:[244,160,21], textColor:255, fontStyle:'bold', fontSize:8},
-    bodyStyles: {fontSize:7},
-    columnStyles: {0:{cellWidth:60}, 1:{cellWidth:50}},
-    margin: {left:margin, right:margin},
-  });
+  if(koRows.length===0){
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(140,140,140);
+    doc.text('Aún no hay partidos de eliminación con puntos registrados.', margin, y+20);
+  } else {
+    doc.autoTable({
+      startY: y,
+      head: [['Ronda','Partido', ...players]],
+      body: koRows,
+      theme: 'grid',
+      headStyles: {fillColor:[244,160,21], textColor:255, fontStyle:'bold', fontSize:8},
+      bodyStyles: {fontSize:7},
+      columnStyles: {0:{cellWidth:60}, 1:{cellWidth:50}},
+      margin: {left:margin, right:margin},
+    });
+  }
 
   // ── Puntos Extra por jugador ───────────────────────
   doc.addPage();
@@ -637,24 +657,33 @@ function exportarPDF(){
   y += 10;
 
   const extraRows = EXTRA_RULES.map(rule=>{
+    const hasAny = players.some((p,pi)=>extras[rule.key]?.[pi]!==undefined);
+    if(!hasAny) return null;
     const row = [rule.label+' ('+rule.pts+' c/u)'];
     players.forEach((p,pi)=>{
       const count=extras[rule.key]?.[pi];
       row.push(count!==undefined?count+' ('+(count*rule.pts)+' pts)':'-');
     });
     return row;
-  });
+  }).filter(Boolean);
 
-  doc.autoTable({
-    startY: y,
-    head: [['Categoría', ...players]],
-    body: extraRows,
-    theme: 'grid',
-    headStyles: {fillColor:[230,57,70], textColor:255, fontStyle:'bold', fontSize:8},
-    bodyStyles: {fontSize:7},
-    columnStyles: {0:{cellWidth:170}},
-    margin: {left:margin, right:margin},
-  });
+  if(extraRows.length===0){
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(140,140,140);
+    doc.text('Aún no hay puntos extra registrados.', margin, y+20);
+  } else {
+    doc.autoTable({
+      startY: y,
+      head: [['Categoría', ...players]],
+      body: extraRows,
+      theme: 'grid',
+      headStyles: {fillColor:[230,57,70], textColor:255, fontStyle:'bold', fontSize:8},
+      bodyStyles: {fontSize:7},
+      columnStyles: {0:{cellWidth:170}},
+      margin: {left:margin, right:margin},
+    });
+  }
 
   // Footer on all pages
   const pageCount = doc.internal.getNumberOfPages();
