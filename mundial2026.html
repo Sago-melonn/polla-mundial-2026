@@ -404,39 +404,42 @@ function resolveRealSlot(s, slotIdx) {
   return s;
 }
 
-// Calcula las 16 llaves reales de 16avos desde resultados reales de grupos
+// Llaves reales de 16avos — confirmadas FIFA/Yahoo Sports (Jun 28, 2026)
 function getRealR16Matchups() {
-  // Pre-calculate third assignment
-  const thirdAssign = {};
-  const usedGroups = new Set();
-  [1,4,6,7,8,9,12,14].forEach(idx => {
-    const eligible = THIRD_ELIGIBLE[idx] || [];
-    for (const gid of eligible) {
-      if (!usedGroups.has(gid)) {
-        const team = grpArr(gid)[2]?.t;
-        if (team) { thirdAssign[idx] = team; usedGroups.add(gid); break; }
-      }
-    }
-  });
-  return R16_SLOTS.map((slot, mi) => {
-    let ht, at;
-    if (/^[12][A-L]$/.test(slot.h)) ht = grpArr(slot.h[1])[parseInt(slot.h[0])-1]?.t || slot.h;
-    else ht = thirdAssign[mi] || slot.h;
-    if (/^[12][A-L]$/.test(slot.a)) at = grpArr(slot.a[1])[parseInt(slot.a[0])-1]?.t || slot.a;
-    else at = thirdAssign[mi] || slot.a;
-    return { n: slot.n, d: slot.d, ht, at };
-  });
+  return [
+    {n:'P73', d:'Jun 28', ht:'Sudáfrica',        at:'Canadá'},
+    {n:'P74', d:'Jun 29', ht:'Alemania',          at:'Paraguay'},
+    {n:'P75', d:'Jun 30', ht:'Holanda',           at:'Marruecos'},
+    {n:'P76', d:'Jun 30', ht:'Brasil',            at:'Japón'},
+    {n:'P77', d:'Jul 1',  ht:'Francia',           at:'Suecia'},
+    {n:'P78', d:'Jul 1',  ht:'Costa de Marfil',   at:'Noruega'},
+    {n:'P79', d:'Jun 30', ht:'México',            at:'Ecuador'},
+    {n:'P80', d:'Jul 2',  ht:'Inglaterra',        at:'Congo DR'},
+    {n:'P81', d:'Jul 1',  ht:'EE.UU.',            at:'Bosnia-Herzegovina'},
+    {n:'P82', d:'Jul 2',  ht:'Bélgica',           at:'Senegal'},
+    {n:'P83', d:'Jul 2',  ht:'Colombia',          at:'Ghana'},
+    {n:'P84', d:'Jul 3',  ht:'España',            at:'Austria'},
+    {n:'P85', d:'Jul 3',  ht:'Suiza',             at:'Argelia'},
+    {n:'P86', d:'Jul 3',  ht:'Argentina',         at:'Cabo Verde'},
+    {n:'P87', d:'Jul 3',  ht:'Portugal',          at:'Croacia'},
+    {n:'P88', d:'Jul 3',  ht:'Australia',         at:'Egipto'},
+  ];
 }
 
-// Calcula +3 pts por clasificados a 16avos acertados
-// (equipos que yo predije que clasificarían y efectivamente clasificaron)
+// Clasificados a 16avos acertados — calculado y verificado vs FIFA (Jun 28, 2026)
+// 26 equipos acertados de 32 → 78 puntos
+// Fallados: Corea del Sur, Chequia, Escocia, Uruguay, Turquía, Irán
 function calcClassifiedPts() {
-  const realMatchups = getRealR16Matchups();
-  const realTeams = new Set(realMatchups.flatMap(m => [m.ht, m.at]));
+  const realTeams = new Set(getRealR16Matchups().flatMap(m => [m.ht, m.at]));
   const predTeams = new Set(PRED_KO[0].flatMap(m => [m.ht, m.at]));
   let hits = 0;
-  predTeams.forEach(t => { if (realTeams.has(t)) hits++; });
-  return { hits, pts: hits * 3 };
+  const hitList = [];
+  const missList = [];
+  predTeams.forEach(t => {
+    if(realTeams.has(t)){ hits++; hitList.push(t); }
+    else missList.push(t);
+  });
+  return { hits, pts: hits * 3, hitList, missList };
 }
 
 // Verifica si una llave predicha coincide exactamente con la real (ambos equipos)
@@ -915,7 +918,16 @@ function calcResumen() {
   const classified = calcClassifiedPts();
   if(classified.hits > 0){
     total += classified.pts;
-    items.push({l:`✓ ${classified.hits} equipo(s) acertados clasificando a 16avos`,p:`+${classified.pts}`});
+    // Item resumen
+    items.push({l:`⚽ ${classified.hits}/32 equipos acertados clasificando a 16avos`,p:`+${classified.pts}`});
+    // Detalle por equipo acertado
+    classified.hitList.forEach(t=>{
+      items.push({l:`  ✓ ${t} clasificó correctamente`,p:'+3'});
+    });
+    // Equipos fallados
+    classified.missList.forEach(t=>{
+      items.push({l:`  ✗ ${t} no clasificó`,p:'0'});
+    });
   }
 
   // ── FASE ELIMINACIÓN ───────────────────────────────
