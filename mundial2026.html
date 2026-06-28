@@ -918,16 +918,10 @@ function calcResumen() {
   const classified = calcClassifiedPts();
   if(classified.hits > 0){
     total += classified.pts;
-    // Item resumen
-    items.push({l:`⚽ ${classified.hits}/32 equipos acertados clasificando a 16avos`,p:`+${classified.pts}`});
-    // Detalle por equipo acertado
-    classified.hitList.forEach(t=>{
-      items.push({l:`  ✓ ${t} clasificó correctamente`,p:'+3'});
-    });
-    // Equipos fallados
-    classified.missList.forEach(t=>{
-      items.push({l:`  ✗ ${t} no clasificó`,p:'0'});
-    });
+    // Solo resumen compacto en esta hoja — el detalle equipo por equipo está en "Detalle Pts"
+    items.push({l:`⚽ Clasificados a 16avos: ${classified.hits}/32 acertados`,p:`+${classified.pts}`});
+    items.push({l:`  ✅ Acertados (${classified.hits}): ${classified.hitList.join(', ')}`,p:''});
+    items.push({l:`  ❌ Fallados (${classified.missList.length}): ${classified.missList.join(', ')}`,p:''});
   }
 
   // ── FASE ELIMINACIÓN ───────────────────────────────
@@ -1027,7 +1021,10 @@ function calcResumen() {
 
   const bl=document.getElementById('bkList');
   bl.innerHTML=items.length
-    ?items.map(i=>`<div class="bdi"><span>${i.l}</span><span class="bdp">${i.p}</span></div>`).join('')
+    ?items.map(i=>i.p
+      ? `<div class="bdi"><span>${i.l}</span><span class="bdp">${i.p}</span></div>`
+      : `<div style="padding:2px 0 4px;font-size:10px;color:var(--t2);line-height:1.4;">${i.l}</div>`
+    ).join('')
     :'<div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div>';
 }
 
