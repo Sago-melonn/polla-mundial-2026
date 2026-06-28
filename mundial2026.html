@@ -1234,6 +1234,39 @@ function buildDetalle() {
     }
   });
 
+  // ── Clasificados a 16avos ───────────────────────────
+  const cls = calcClassifiedPts();
+  grandTotal += cls.pts;
+  const clsDiv = document.createElement('div'); clsDiv.className = 'kor';
+  const clsT = document.createElement('div'); clsT.className = 'kort';
+  clsT.style.color = 'var(--v)';
+  clsT.innerHTML = `Clasificados a 16avos <span class="koptag">+3 pts por equipo</span>`;
+  clsDiv.appendChild(clsT);
+
+  // Card resumen
+  const clsSummary = document.createElement('div'); clsSummary.className = 'kom';
+  clsSummary.innerHTML = `
+    <div class="komh"><span>⚽ Equipos acertados clasificando</span><span>${cls.hits} de 32</span></div>
+    <div class="ptsr" style="padding-top:6px;">
+      <span class="pb hit">+${cls.pts} pts total</span>
+      <span class="pb pend" style="font-size:9px">${cls.hits} equipos × 3 pts</span>
+    </div>`;
+  clsDiv.appendChild(clsSummary);
+
+  // Detalle por equipo
+  cls.hitList.forEach(t => {
+    const c = document.createElement('div'); c.className = 'kom';
+    c.innerHTML = `<div class="komh"><span>✅ ${t}</span><span style="color:var(--v)">+3 pts</span></div>`;
+    clsDiv.appendChild(c);
+  });
+  cls.missList.forEach(t => {
+    const c = document.createElement('div'); c.className = 'kom';
+    c.style.opacity = '0.5';
+    c.innerHTML = `<div class="komh"><span>❌ ${t}</span><span style="color:var(--r)">0 pts</span></div>`;
+    clsDiv.appendChild(c);
+  });
+  wrap.appendChild(clsDiv);
+
   // ── Eliminación ─────────────────────────────────────
   PRED_KO.forEach((round,r)=>{
     let roundItems=[];
@@ -1243,8 +1276,13 @@ function buildDetalle() {
       const rs=realKO[r]?.[mi]||{};
       const rscore=`${rs.h}-${rs.a}`;
 
+      const matchLlaveD = r===0 ? llavesMatch(mi) : true;
       let pts=0, det=[];
-      if(r===0&&rw===predW){pts+=3;det.push('Clasif. 16avos +3');}
+      if(r===0){
+        if(!matchLlaveD){ det.push('Llave ≠ pred → 0 pts'); }
+        else if(rw===predW){ pts+=3; det.push('Clasif. 16avos +3 ✓'); }
+        else { det.push('Llave OK pero equipo pred no avanzó'); }
+      }
       if(r===1&&rw===predW){pts+=4;det.push('Clasif. octavos +4');}
       if(r===2&&rw===predW){pts+=5;det.push('Clasif. cuartos +5');}
       if(r===3&&rw===predW){pts+=6;det.push('Clasif. semis +6');}
