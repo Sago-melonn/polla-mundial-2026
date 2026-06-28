@@ -181,8 +181,12 @@ input.real-name:focus{border-color:var(--d);}
   <div class="mets">
     <div class="met"><div class="val" id="mR">0</div><div class="lbl">Resultados acertados (+1)</div></div>
     <div class="met"><div class="val" id="mM">0</div><div class="lbl">Marcadores exactos (+3)</div></div>
-    <div class="met"><div class="val" id="m16">0</div><div class="lbl">Equipos acertados a 16avos (+3 c/u)</div></div>
-    <div class="met"><div class="val" id="m16p">0</div><div class="lbl">Pts por partidos 16avos (+3)</div></div>
+    <div class="met">
+      <div class="val" id="m16">0</div>
+      <div class="lbl">Pts clasificados 16avos</div>
+      <div id="m16sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 equipos acertados</div>
+    </div>
+    <div class="met"><div class="val" id="m16p">0</div><div class="lbl">Pts partidos 16avos (+3)</div></div>
     <div class="met"><div class="val" id="m8">0</div><div class="lbl">Aciertos octavos (+4)</div></div>
     <div class="met"><div class="val" id="m4">0</div><div class="lbl">Aciertos cuartos (+5)</div></div>
     <div class="met"><div class="val" id="m2">0</div><div class="lbl">Aciertos semis (+6)</div></div>
@@ -1010,7 +1014,9 @@ function calcResumen() {
   document.getElementById('tPts').textContent=total;
   document.getElementById('mR').textContent=res_;
   document.getElementById('mM').textContent=mark;
-  document.getElementById('m16').textContent=classified.hits;
+  document.getElementById('m16').textContent=classified.pts;
+  const m16sub = document.getElementById('m16sub');
+  if(m16sub) m16sub.textContent=classified.hits+' equipos acertados';
   document.getElementById('m16p').textContent=pts16/3|0;
   document.getElementById('m8').textContent=pts8/4|0;
   document.getElementById('m4').textContent=pts4/5|0;
