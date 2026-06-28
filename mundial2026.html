@@ -179,22 +179,62 @@ input.real-name:focus{border-color:var(--d);}
 <div id="resumen" class="pg">
   <div class="hero"><div class="big" id="tPts">0</div><div class="lbl">PUNTOS — POLLA LA CHUCHA</div></div>
   <div class="mets">
-    <div class="met"><div class="val" id="mR">0</div><div class="lbl">Resultados acertados (+1)</div></div>
-    <div class="met"><div class="val" id="mM">0</div><div class="lbl">Marcadores exactos (+3)</div></div>
+    <div class="met">
+      <div class="val" id="mR">0</div>
+      <div class="lbl">Pts resultados (+1 c/u)</div>
+      <div id="mRsub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 acertados</div>
+    </div>
+    <div class="met">
+      <div class="val" id="mM">0</div>
+      <div class="lbl">Pts marcadores exactos (+3 c/u)</div>
+      <div id="mMsub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 exactos</div>
+    </div>
     <div class="met">
       <div class="val" id="m16">0</div>
-      <div class="lbl">Pts clasificados 16avos</div>
+      <div class="lbl">Pts clasificados 16avos (+3 c/u)</div>
       <div id="m16sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 equipos acertados</div>
     </div>
-    <div class="met"><div class="val" id="m16p">0</div><div class="lbl">Pts partidos 16avos (+3)</div></div>
-    <div class="met"><div class="val" id="m8">0</div><div class="lbl">Aciertos octavos (+4)</div></div>
-    <div class="met"><div class="val" id="m4">0</div><div class="lbl">Aciertos cuartos (+5)</div></div>
-    <div class="met"><div class="val" id="m2">0</div><div class="lbl">Aciertos semis (+6)</div></div>
-    <div class="met"><div class="val" id="m1">0</div><div class="lbl">Finalistas acertados (+7)</div></div>
-    <div class="met"><div class="val" id="m3">0</div><div class="lbl">Tercer puesto (+10)</div></div>
-    <div class="met"><div class="val" id="mSub">0</div><div class="lbl">Subcampeón (+15)</div></div>
-    <div class="met"><div class="val" id="mCamp">0</div><div class="lbl">Campeón (+20)</div></div>
-    <div class="met"><div class="val" id="mCuarto">0</div><div class="lbl">Cuarto puesto (+7)</div></div>
+    <div class="met">
+      <div class="val" id="m16p">0</div>
+      <div class="lbl">Pts partidos 16avos (+3 c/u)</div>
+      <div id="m16psub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 partidos</div>
+    </div>
+    <div class="met">
+      <div class="val" id="m8">0</div>
+      <div class="lbl">Pts octavos (+4 c/u)</div>
+      <div id="m8sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 acertados</div>
+    </div>
+    <div class="met">
+      <div class="val" id="m4">0</div>
+      <div class="lbl">Pts cuartos (+5 c/u)</div>
+      <div id="m4sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 acertados</div>
+    </div>
+    <div class="met">
+      <div class="val" id="m2">0</div>
+      <div class="lbl">Pts semifinales (+6 c/u)</div>
+      <div id="m2sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 acertados</div>
+    </div>
+    <div class="met">
+      <div class="val" id="m1">0</div>
+      <div class="lbl">Pts finalistas (+7 c/u)</div>
+      <div id="m1sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 acertados</div>
+    </div>
+    <div class="met">
+      <div class="val" id="m3">0</div>
+      <div class="lbl">Pts tercer puesto (+10)</div>
+    </div>
+    <div class="met">
+      <div class="val" id="mSub">0</div>
+      <div class="lbl">Pts subcampeón (+15)</div>
+    </div>
+    <div class="met">
+      <div class="val" id="mCamp">0</div>
+      <div class="lbl">Pts campeón (+20)</div>
+    </div>
+    <div class="met">
+      <div class="val" id="mCuarto">0</div>
+      <div class="lbl">Pts cuarto puesto (+7)</div>
+    </div>
   </div>
   <div class="bkd"><h3>Desglose</h3><div id="bkList"><div style="color:var(--t2);font-size:11px;">Ingresa resultados reales para ver puntos.</div></div></div>
 </div>
@@ -1012,20 +1052,36 @@ function calcResumen() {
 
   // Actualizar UI
   document.getElementById('tPts').textContent=total;
+  // Resultados: pts como valor principal, cantidad como subtítulo
   document.getElementById('mR').textContent=res_;
-  document.getElementById('mM').textContent=mark;
+  const mRsub=document.getElementById('mRsub'); if(mRsub) mRsub.textContent=res_+' acertados';
+  // Marcadores: pts = mark*3
+  document.getElementById('mM').textContent=mark*3;
+  const mMsub=document.getElementById('mMsub'); if(mMsub) mMsub.textContent=mark+' exactos';
+  // Clasificados 16avos
   document.getElementById('m16').textContent=classified.pts;
-  const m16sub = document.getElementById('m16sub');
-  if(m16sub) m16sub.textContent=classified.hits+' equipos acertados';
-  document.getElementById('m16p').textContent=pts16/3|0;
-  document.getElementById('m8').textContent=pts8/4|0;
-  document.getElementById('m4').textContent=pts4/5|0;
-  document.getElementById('m2').textContent=pts2/6|0;
-  document.getElementById('m1').textContent=ptsFin/7|0;
-  document.getElementById('m3').textContent=pts3er>0?1:0;
-  document.getElementById('mSub').textContent=ptsSub>0?1:0;
-  document.getElementById('mCamp').textContent=ptsCamp>0?1:0;
-  document.getElementById('mCuarto').textContent=ptsCuarto>0?1:0;
+  const m16sub=document.getElementById('m16sub'); if(m16sub) m16sub.textContent=classified.hits+' equipos acertados';
+  // Partidos 16avos
+  const p16count=pts16/3|0;
+  document.getElementById('m16p').textContent=pts16;
+  const m16psub=document.getElementById('m16psub'); if(m16psub) m16psub.textContent=p16count+' partidos acertados';
+  // Octavos
+  document.getElementById('m8').textContent=pts8;
+  const m8sub=document.getElementById('m8sub'); if(m8sub) m8sub.textContent=(pts8/4|0)+' acertados';
+  // Cuartos
+  document.getElementById('m4').textContent=pts4;
+  const m4sub=document.getElementById('m4sub'); if(m4sub) m4sub.textContent=(pts4/5|0)+' acertados';
+  // Semis
+  document.getElementById('m2').textContent=pts2;
+  const m2sub=document.getElementById('m2sub'); if(m2sub) m2sub.textContent=(pts2/6|0)+' acertados';
+  // Finalistas
+  document.getElementById('m1').textContent=ptsFin;
+  const m1sub=document.getElementById('m1sub'); if(m1sub) m1sub.textContent=(ptsFin/7|0)+' acertados';
+  // Posiciones finales
+  document.getElementById('m3').textContent=pts3er;
+  document.getElementById('mSub').textContent=ptsSub;
+  document.getElementById('mCamp').textContent=ptsCamp;
+  document.getElementById('mCuarto').textContent=ptsCuarto;
 
   const bl=document.getElementById('bkList');
   bl.innerHTML=items.length
