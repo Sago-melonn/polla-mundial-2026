@@ -824,32 +824,7 @@ function buildRealKO() {
         defHt=stored.ht||'';
         defAt=stored.at||'';
       }
-      if(!defHt||!defAt){
-        else if(r===5){
-            defHt=realKOLoser(3,0)||'Perdedor SF1';
-            defAt=realKOLoser(3,1)||'Perdedor SF2';
-          } else {
-            const prevRound=r-1;
-          const [hi,ai]=[[1,4],[0,2],[3,5],[6,7],[10,11],[8,9],[13,15],[12,14],
-                          [0,1],[2,3],[4,5],[6,7],[0,1],[2,3],[0,1],[2,3]][r===1?mi*2:r===2?mi*2:r===3?mi*2:0];
-          if(r===1){
-            const pairs=[[1,4],[0,2],[3,5],[6,7],[10,11],[8,9],[13,15],[12,14]];
-            defHt=realKOWinner(0,pairs[mi][0])||pm.ht;
-            defAt=realKOWinner(0,pairs[mi][1])||pm.at;
-          } else if(r===2){
-            const pairs=[[0,1],[4,5],[2,3],[6,7]];
-            defHt=realKOWinner(1,pairs[mi][0])||pm.ht;
-            defAt=realKOWinner(1,pairs[mi][1])||pm.at;
-          } else if(r===3){
-            const pairs=[[0,1],[2,3]];
-            defHt=realKOWinner(2,pairs[mi][0])||pm.ht;
-            defAt=realKOWinner(2,pairs[mi][1])||pm.at;
-          } else if(r===4){
-            defHt=realKOWinner(3,0)||pm.ht;
-            defAt=realKOWinner(3,1)||pm.at;
-          }
-        }
-      }
+
 
       const sh=stored.h!==undefined?stored.h:'';
       const sa=stored.a!==undefined?stored.a:'';
