@@ -201,8 +201,8 @@ input.real-name:focus{border-color:var(--d);}
     </div>
     <div class="met">
       <div class="val" id="m8">0</div>
-      <div class="lbl">Pts octavos (+4 c/u)</div>
-      <div id="m8sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 acertados</div>
+      <div class="lbl">Pts clasificados octavos (+4 c/u)</div>
+      <div id="m8sub" style="font-size:9px;color:var(--t2);margin-top:2px;">0 equipos acertados</div>
     </div>
     <div class="met">
       <div class="val" id="m4">0</div>
@@ -447,6 +447,30 @@ function resolveRealSlot(s, slotIdx) {
     return result;
   }
   return s;
+}
+
+// Ganadores reales de 16avos (Round of 32) — confirmados ESPN/Yahoo/FourFourTwo
+const REAL_R32_WINNERS = [
+  'Canadá','Paraguay','Marruecos','Brasil','Francia','Noruega',
+  'México','Inglaterra','EE.UU.','Bélgica','Colombia','España',
+  'Suiza','Argentina','Portugal','Egipto'
+];
+
+// Equipos que predijiste clasificarían a octavos (ganadores predichos de P73-P88)
+function getPredR32Winners() {
+  return PRED_KO[0].map(m => m.ph > m.pa ? m.ht : m.ph < m.pa ? m.at : m.pen);
+}
+
+// Calcula +4 pts por equipos acertados clasificando a octavos
+function calcClassifiedR8() {
+  const realSet = new Set(REAL_R32_WINNERS);
+  const predWinners = getPredR32Winners();
+  const hitList = [], missList = [];
+  predWinners.forEach(t => {
+    if(realSet.has(t)) hitList.push(t);
+    else missList.push(t);
+  });
+  return { hits: hitList.length, pts: hitList.length * 4, hitList, missList };
 }
 
 // Llaves reales de 16avos — confirmadas FIFA/Yahoo Sports (Jun 28, 2026)
@@ -969,6 +993,15 @@ function calcResumen() {
     items.push({l:`  ❌ Fallados (${classified.missList.length}): ${classified.missList.join(', ')}`,p:''});
   }
 
+  // ── CLASIFICADOS A OCTAVOS (+4 por equipo acertado) ─
+  const classifiedR8 = calcClassifiedR8();
+  if(classifiedR8.hits > 0){
+    total += classifiedR8.pts;
+    items.push({l:`⚽ Clasificados a octavos: ${classifiedR8.hits}/16 acertados`, p:`+${classifiedR8.pts}`});
+    items.push({l:`  ✅ Acertados (${classifiedR8.hits}): ${classifiedR8.hitList.join(', ')}`, p:''});
+    items.push({l:`  ❌ Fallados (${classifiedR8.missList.length}): ${classifiedR8.missList.join(', ')}`, p:''});
+  }
+
   // ── FASE ELIMINACIÓN ───────────────────────────────
   // Reglas 3-7: clasificados por ronda
   // R0=16avos(+3), R1=octavos(+4), R2=cuartos(+5), R3=semis(+6)
@@ -981,13 +1014,24 @@ function calcResumen() {
       const rw = realKOWinner(r,mi); if(!rw) return;
       const predW = pm.ph>pm.pa ? pm.ht : pm.ph<pm.pa ? pm.at : pm.pen;
 
-      if(r===0){ // 16avos: puntos solo si la llave coincide exactamente (ambos equipos)
-        if(rw===predW && llavesMatch(mi)){
-          total+=3;pts16+=3;
-          items.push({l:`✓ ${pm.n}: ${predW} avanza (llave correcta)`,p:'+3'});
-        } else if(rw===predW && !llavesMatch(mi)){
-          // Equipo avanzó pero llave no coincidía — 0 pts en este partido
-          items.push({l:`~ ${pm.n}: ${predW} avanzó pero llave no coincidía`,p:'0'});
+      if(r===0){ // 16avos: llave exacta → +3 marcador exacto / +1 resultado; llave ≠ → 0 pts
+        if(llavesMatch(mi)){
+          // Llave coincide — calcular igual que fase de grupos
+          const rs = realKO[0]?.[mi] || {};
+          const rh = parseInt(rs.h), ra = parseInt(rs.a);
+          const exact = !isNaN(rh) && !isNaN(ra) && pm.ph===rh && pm.pa===ra;
+          const resOk = !isNaN(rh) && !isNaN(ra) && (pm.ph>pm.pa?'H':pm.ph<pm.pa?'A':'D')===(rh>ra?'H':rh<ra?'A':'D');
+          if(exact){
+            total+=3; pts16+=3;
+            items.push({l:`⭐ ${pm.n}: marcador exacto (llave correcta)`,p:'+3'});
+          } else if(resOk){
+            total+=1; pts16+=1;
+            items.push({l:`✓ ${pm.n}: resultado correcto (llave correcta)`,p:'+1'});
+          } else if(rw!==null){
+            items.push({l:`✗ ${pm.n}: llave correcta pero resultado errado`,p:'0'});
+          }
+        } else {
+          if(rw!==null) items.push({l:`~ ${pm.n}: llave ≠ pred → 0 pts`,p:'0'});
         }
       }
       else if(r===1){ // Octavos: +4
@@ -1066,8 +1110,8 @@ function calcResumen() {
   document.getElementById('m16p').textContent=pts16;
   const m16psub=document.getElementById('m16psub'); if(m16psub) m16psub.textContent=p16count+' partidos acertados';
   // Octavos
-  document.getElementById('m8').textContent=pts8;
-  const m8sub=document.getElementById('m8sub'); if(m8sub) m8sub.textContent=(pts8/4|0)+' acertados';
+  document.getElementById('m8').textContent=classifiedR8.pts;
+  const m8sub=document.getElementById('m8sub'); if(m8sub) m8sub.textContent=classifiedR8.hits+' equipos acertados';
   // Cuartos
   document.getElementById('m4').textContent=pts4;
   const m4sub=document.getElementById('m4sub'); if(m4sub) m4sub.textContent=(pts4/5|0)+' acertados';
