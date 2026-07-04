@@ -1397,9 +1397,18 @@ function buildDetalle() {
       const matchLlaveD = r===0 ? llavesMatch(mi) : true;
       let pts=0, det=[];
       if(r===0){
-        if(!matchLlaveD){ det.push('Llave ≠ pred → 0 pts'); }
-        else if(rw===predW){ pts+=3; det.push('Clasif. 16avos +3 ✓'); }
-        else { det.push('Llave OK pero equipo pred no avanzó'); }
+        if(!matchLlaveD){
+          det.push('Llave ≠ pred → 0 pts');
+        } else if(rs.h!==undefined && rs.h!==''){
+          // Llave coincide — aplicar regla marcador/resultado igual que grupos
+          const rh3=parseInt(rs.h), ra3=parseInt(rs.a);
+          const exact3 = pm.ph===rh3 && pm.pa===ra3;
+          const resStr3 = (h,a)=>h>a?'H':h<a?'A':'D';
+          const resOk3 = resStr3(pm.ph,pm.pa)===resStr3(rh3,ra3);
+          if(exact3){ pts+=3; det.push('⭐ Marcador exacto +3'); }
+          else if(resOk3){ pts+=1; det.push('✓ Resultado correcto +1'); }
+          else { det.push('✗ Resultado errado → 0 pts'); }
+        }
       }
       if(r===1&&rw===predW){pts+=4;det.push('Clasif. octavos +4');}
       if(r===2&&rw===predW){pts+=5;det.push('Clasif. cuartos +5');}
