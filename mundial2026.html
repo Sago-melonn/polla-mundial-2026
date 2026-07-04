@@ -1385,6 +1385,39 @@ function buildDetalle() {
   });
   wrap.appendChild(clsDiv);
 
+  // ── Clasificados a Octavos ───────────────────────────
+  const clsR8 = calcClassifiedR8();
+  const clsR8Div = document.createElement('div'); clsR8Div.className = 'kor';
+  const clsR8T = document.createElement('div'); clsR8T.className = 'kort';
+  clsR8T.style.color = 'var(--v)';
+  clsR8T.innerHTML = `Clasificados a Octavos <span class="koptag">+4 pts por equipo</span>`;
+  clsR8Div.appendChild(clsR8T);
+
+  // Card resumen
+  const clsR8Summary = document.createElement('div'); clsR8Summary.className = 'kom';
+  clsR8Summary.innerHTML = `
+    <div class="komh"><span>⚽ Equipos acertados clasificando</span><span>${clsR8.hits} de 16</span></div>
+    <div class="ptsr" style="padding-top:6px;">
+      <span class="pb hit">+${clsR8.pts} pts total</span>
+      <span class="pb pend" style="font-size:9px">${clsR8.hits} equipos × 4 pts</span>
+    </div>`;
+  clsR8Div.appendChild(clsR8Summary);
+
+  // Detalle por equipo
+  clsR8.hitList.forEach(t => {
+    const c = document.createElement('div'); c.className = 'kom';
+    c.innerHTML = `<div class="komh"><span>✅ ${t}</span><span style="color:var(--v)">+4 pts</span></div>`;
+    clsR8Div.appendChild(c);
+  });
+  clsR8.missList.forEach(t => {
+    const c = document.createElement('div'); c.className = 'kom';
+    c.style.opacity = '0.5';
+    c.innerHTML = `<div class="komh"><span>❌ ${t}</span><span style="color:var(--r)">0 pts</span></div>`;
+    clsR8Div.appendChild(c);
+  });
+  grandTotal += clsR8.pts;
+  wrap.appendChild(clsR8Div);
+
   // ── Eliminación ─────────────────────────────────────
   PRED_KO.forEach((round,r)=>{
     let roundItems=[];
