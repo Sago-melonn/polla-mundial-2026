@@ -811,17 +811,20 @@ function buildRealKO() {
       // Para r=0 se pueden editar libremente (pueden ser distintos a predicción)
       const stored=realKO[r][mi]||{};
       // Nombre por defecto: para r=0 usar llaves reales calculadas desde grupos
-      let defHt=stored.ht||'';
-      let defAt=stored.at||'';
+      // Para r=0 y r=1 siempre usar equipos reales quemados (no localStorage)
+      let defHt, defAt;
+      if(r===0){
+        const realMatchups=getRealR16Matchups();
+        defHt=realMatchups[mi]?.ht||pm.ht;
+        defAt=realMatchups[mi]?.at||pm.at;
+      } else if(r===1){
+        defHt=REAL_R16_MATCHUPS[mi]?.ht||pm.ht;
+        defAt=REAL_R16_MATCHUPS[mi]?.at||pm.at;
+      } else {
+        defHt=stored.ht||'';
+        defAt=stored.at||'';
+      }
       if(!defHt||!defAt){
-        if(r===0){
-          const realMatchups=getRealR16Matchups();
-          defHt=realMatchups[mi]?.ht||pm.ht;
-          defAt=realMatchups[mi]?.at||pm.at;
-        } else if(r===1){
-          defHt=REAL_R16_MATCHUPS[mi]?.ht||pm.ht;
-          defAt=REAL_R16_MATCHUPS[mi]?.at||pm.at;
-        }
         else if(r===5){
           defHt=realKOLoser(3,0)||'Perdedor SF1';
           defAt=realKOLoser(3,1)||'Perdedor SF2';
@@ -882,11 +885,21 @@ function buildRealKO() {
       }
 
       const card=document.createElement('div');card.className='real-match';card.id='rm_'+r+'_'+mi;
-      const llaveBadge = r===0
-        ? (matchLlave
-            ? '<span style="color:var(--v);font-size:9px;margin-left:6px">✓ Llave correcta</span>'
-            : '<span style="color:var(--r);font-size:9px;margin-left:6px">✗ Llave diferente a pred</span>')
-        : '';
+      // Verificar llave para r=0 y r=1
+      let llaveBadge = '';
+      if(r===0){
+        llaveBadge = matchLlave
+          ? '<span style="color:var(--v);font-size:9px;margin-left:6px">✓ Llave correcta</span>'
+          : '<span style="color:var(--r);font-size:9px;margin-left:6px">✗ Llave diferente a pred</span>';
+      } else if(r===1){
+        // Comparar llave real (REAL_R16_MATCHUPS) vs llave predicha (PRED_KO[1])
+        const realSet8 = new Set([defHt, defAt]);
+        const predMatch8 = PRED_KO[1][mi];
+        const llaveOk8 = predMatch8 && realSet8.has(predMatch8.ht) && realSet8.has(predMatch8.at);
+        llaveBadge = llaveOk8
+          ? '<span style="color:var(--v);font-size:9px;margin-left:6px">✓ Llave correcta</span>'
+          : '<span style="color:var(--r);font-size:9px;margin-left:6px">✗ Llave diferente a pred</span>';
+      }
       card.innerHTML=`
         <div class="real-match-header">${pm.n} · ${pm.d}${llaveBadge}</div>
         <div class="real-row">
