@@ -839,17 +839,26 @@ function buildRealKO() {
       const rW=sh!==''&&sa!==''?(parseInt(sh)>parseInt(sa)?defHt:parseInt(sh)<parseInt(sa)?defAt:spen):null;
       const tied=sh!==''&&sa!==''&&parseInt(sh)===parseInt(sa);
 
-      // Puntos: para r=0 validar llave exacta; para otros comparar ganador
+      // Puntos: para r=0 → llave exacta + regla marcador/resultado; otros → ganador
       const predW=pm.ph>pm.pa?pm.ht:pm.ph<pm.pa?pm.at:pm.pen;
       const matchLlave = r===0 ? llavesMatch(mi) : true;
       let ptH='<span class="pb pend">Pendiente</span>';
       if(r===0){
         if(!matchLlave){
           ptH='<span class="pb miss">Llave ≠ pred → 0 pts</span>';
-        } else if(rW){
-          ptH=rW===predW
-            ?`<span class="pb hit">+${RPTS[r]} pts ✓</span>`
-            :'<span class="pb miss">0 pts ✗</span>';
+        } else if(sh!=='' && sa!==''){
+          // Llave coincide — aplicar regla igual que grupos
+          const rh2=parseInt(sh), ra2=parseInt(sa);
+          const exact2 = pm.ph===rh2 && pm.pa===ra2;
+          const resStr2 = (h,a)=>h>a?'H':h<a?'A':'D';
+          const resOk2 = resStr2(pm.ph,pm.pa)===resStr2(rh2,ra2);
+          if(exact2){
+            ptH='<span class="pb hit">+3 pts ⭐ Marcador exacto</span>';
+          } else if(resOk2){
+            ptH='<span class="pb hit">+1 pt ✓ Resultado correcto</span>';
+          } else {
+            ptH='<span class="pb miss">0 pts ✗ Resultado errado</span>';
+          }
         }
       } else if(rW){
         ptH=rW===predW
