@@ -456,6 +456,18 @@ const REAL_R32_WINNERS = [
   'Suiza','Argentina','Portugal','Egipto'
 ];
 
+// Llaves reales de octavos (Round of 16) — confirmadas ESPN/Yahoo (Jul 4-7, 2026)
+const REAL_R16_MATCHUPS = [
+  {n:'P89', d:'Jul 4', ht:'Canadá',    at:'Marruecos'},
+  {n:'P90', d:'Jul 5', ht:'Paraguay',  at:'Francia'},
+  {n:'P91', d:'Jul 5', ht:'Brasil',    at:'Noruega'},
+  {n:'P92', d:'Jul 5', ht:'México',    at:'Inglaterra'},
+  {n:'P93', d:'Jul 6', ht:'España',    at:'Portugal'},
+  {n:'P94', d:'Jul 6', ht:'EE.UU.',   at:'Bélgica'},
+  {n:'P95', d:'Jul 7', ht:'Argentina', at:'Egipto'},
+  {n:'P96', d:'Jul 7', ht:'Suiza',     at:'Colombia'},
+];
+
 // Equipos que predijiste clasificarían a octavos (ganadores predichos de P73-P88)
 function getPredR32Winners() {
   return PRED_KO[0].map(m => m.ph > m.pa ? m.ht : m.ph < m.pa ? m.at : m.pen);
@@ -806,6 +818,9 @@ function buildRealKO() {
           const realMatchups=getRealR16Matchups();
           defHt=realMatchups[mi]?.ht||pm.ht;
           defAt=realMatchups[mi]?.at||pm.at;
+        } else if(r===1){
+          defHt=REAL_R16_MATCHUPS[mi]?.ht||pm.ht;
+          defAt=REAL_R16_MATCHUPS[mi]?.at||pm.at;
         }
         else if(r===5){
           defHt=realKOLoser(3,0)||'Perdedor SF1';
@@ -901,8 +916,8 @@ function buildRealKO() {
 
       // Events — score inputs update state + UI in place (no rebuild, avoids losing focus)
       const updateScore=()=>{
-        const ht=document.getElementById('rnt_'+r+'_'+mi)?.value||defHt;
-        const at=document.getElementById('rna_'+r+'_'+mi)?.value||defAt;
+        const ht=r===1&&REAL_R16_MATCHUPS[mi]?REAL_R16_MATCHUPS[mi].ht:(document.getElementById('rnt_'+r+'_'+mi)?.value||defHt);
+        const at=r===1&&REAL_R16_MATCHUPS[mi]?REAL_R16_MATCHUPS[mi].at:(document.getElementById('rna_'+r+'_'+mi)?.value||defAt);
         const hv=document.getElementById('rsh_'+r+'_'+mi)?.value;
         const av=document.getElementById('rsa_'+r+'_'+mi)?.value;
         if(!realKO[r])realKO[r]={};
